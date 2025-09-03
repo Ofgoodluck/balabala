@@ -1,0 +1,10 @@
+{
+  "include": {
+    "BigTree": "BigTree.json"
+  },
+  "root": {
+    "全局crms": {
+      "tag": "BigTree"
+    }
+  }
+}

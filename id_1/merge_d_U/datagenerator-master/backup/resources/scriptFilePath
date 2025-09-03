@@ -1,0 +1,7 @@
+xxAddresses=.\backup\resources\xxAddresses.csv
+xxCoordinationEvent=.\backup\resources\xxCoordinationEvent.csv
+xxCyberspaceEvents=.\backup\resources\xxCyberspaceEvents.csv
+xxEnvironmentEvent=.\backup\resources\xxEnvironmentEvent.csv
+xxInformation=.\backup\resources\xxInformation.csv
+xxActiveRadarFrequency=.\backup\resources\xxActiveRadarFrequency.csv
+xxDynamicResourceConfig=.\backup\resources\xxDynamicResourceConfig.csv

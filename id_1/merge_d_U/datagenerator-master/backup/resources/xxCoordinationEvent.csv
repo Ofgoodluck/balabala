@@ -1,0 +1,24 @@
+# 时间轴,协同事件类型,编队编号,编队领头,编队成员
+0-100,FormationKeep,1,1,2;5;8
+0-100,FormationKeep,2,3,6;9
+0-100,FormationKeep,3,4,7;10
+0-100,ESMPositioning,4,1,2;3;4;5;6;7;8;9;10
+100,Dismiss,1,1,2;5;8
+100,Dismiss,2,3,6;9
+100,Dismiss,3,4,7;10
+100,Dismiss,4,1,2;3;4;5;6;7;8;9;10
+100-141,ActiveRadarPositioning,5,2,1;8;9
+100-141,ActiveRadarPositioning,6,3,5;10
+100-156,ActiveRadarPositioning,7,4,6;7
+141,Dismiss,5,2,
+141,Dismiss,6,3,5
+141-156,ActiveRadarPositioning,5,5,8;9
+141-156,ActiveRadarPositioning,6,3,1;10
+156,Dismiss,7,4,6;7
+156-250,Guidance,8,4,
+156-250,Guidance,9,6,
+156-250,Guidance,10,7,
+180,Dismiss,5,5,8;9
+180,Dismiss,6,3,1;10
+180-250,Guidance,11,3,10;8
+180-250,Guidance,12,5,1;9

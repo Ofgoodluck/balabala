@@ -1,0 +1,217 @@
+{
+  "resourceTree": {
+    "resourceName": "全局CRMS",
+    "resourceType": "ResourceObject",
+    "children": [
+      {
+        "resourceName": "仿真启动配置子树",
+        "resourceType": "ResourceObject",
+        "children": [
+          {
+            "resourceName": "互操作模板",
+            "resourceType": "Attribute",
+            "dataType": "string",
+            "name": "templates",
+            "data": ""
+          },
+          {
+            "resourceName": "容器个数",
+            "resourceType": "Attribute",
+            "dataType": "int32",
+            "name": "Docker_Num",
+            "data": 0
+          },
+          {
+            "resourceName": "网络仿真配置",
+            "resourceType": "Command",
+            "columns": {
+              "平台ID": "string",
+              "邻居ID": "string",
+              "带宽": "int64",
+              "时延": "int32",
+              "丢包率": "float64"
+            }
+          },
+          {
+            "resourceName": "装备信息",
+            "resourceType": "Command",
+            "columns": {
+              "装备名称": "string",
+              "装备数据发生器软件路径": "string",
+              "装备资源子树描述文件路径": "string"
+            }
+          },
+          {
+            "resourceName": "航电平台容器配置",
+            "resourceType": "Command",
+            "columns": {
+              "平台ID": "string",
+              "平台装备配置": "string"
+            }
+          },
+          {
+            "resourceName": "互操作选角",
+            "resourceType": "Command",
+            "columns": {
+              "平台ID": "string",
+              "角色名称": "string"
+            }
+          },
+          {
+            "resourceName": "互操作结果评价软件路径",
+            "resourceType": "Attribute",
+            "dataType": "string",
+            "name": "PathOfEvaluateSW",
+            "data": ""
+          }
+        ]
+      },
+      {
+        "resourceName": "全局资源树",
+        "resourceType": "ResourceObject",
+        "children": [
+          {
+            "resourceName": "容器编排",
+            "resourceType": "ResourceObject",
+            "children": [
+              {
+                "resourceName": "<容器ID>状态",
+                "resourceType": "ResourceObject",
+                "children": [
+                  {
+                    "resourceName": "容器ID",
+                    "resourceType": "Attribute",
+                    "dataType": "string",
+                    "name": "Docker_ID",
+                    "data": ""
+                  },
+                  {
+                    "resourceName": "容器运行状态",
+                    "resourceType": "Attribute",
+                    "dataType": "string",
+                    "name": "Docker_Status",
+                    "data": ""
+                  },
+                  {
+                    "resourceName": "软件存活状态",
+                    "resourceType": "DataTable",
+                    "columns": {
+                      "软件名称": "string",
+                      "软件执行路径": "string",
+                      "存活状态": "bool",
+                      "退出状态码": "int32"
+                    }
+                  },
+                  {
+                    "resourceName": "容器CRMS日志",
+                    "resourceType": "DataTable",
+                    "columns": {
+                      "时间": "string",
+                      "日志行": "string"
+                    }
+                  },
+                  {
+                    "resourceName": "<装备名称1>数据发生器日志",
+                    "resourceType": "DataTable",
+                    "columns": {
+                      "时间": "string",
+                      "日志行": "string"
+                    }
+                  },
+                  {
+                    "resourceName": "<装备名称2>数据发生器日志",
+                    "resourceType": "DataTable",
+                    "columns": {
+                      "时间": "string",
+                      "日志行": "string"
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "resourceName": "网络仿真",
+            "resourceType": "ResourceObject",
+            "children": [
+              {
+                "resourceName": "网络仿真参数",
+                "resourceType": "DataTable",
+                "columns": {
+                  "平台ID": "string",
+                  "邻居ID": "string",
+                  "带宽": "int64",
+                  "时延": "int32",
+                  "丢包率": "float64"
+                }
+              },
+              {
+                "resourceName": "流量数据统计",
+                "resourceType": "DataTable",
+                "columns": {
+                  "平台ID": "string",
+                  "邻居ID": "string",
+                  "带宽占用": "int64",
+                  "时间": "string"
+                }
+              },
+              {
+                "resourceName": "数据交换统计",
+                "resourceType": "DataTable",
+                "columns": {
+                  "平台ID": "string",
+                  "邻居ID": "string",
+                  "数据内容": "string",
+                  "时间": "string",
+                  "数据交换时延": "int64"
+                }
+              }
+            ]
+          },
+          {
+            "resourceName": "互操作",
+            "resourceType": "ResourceObject",
+            "children": [
+              {
+                "resourceName": "<平台ID>指令",
+                "resourceType": "DataTable",
+                "columns": {
+                  "下发时间": "string",
+                  "指令内容": "string"
+                }
+              },
+              {
+                "resourceName": "时延",
+                "resourceType": "ResourceObject",
+                "children": [
+                  {
+                    "resourceName": "指令执行时延",
+                    "resourceType": "DataTable",
+                    "columns": {
+                      "指令": "string",
+                      "时延": "int64"
+                    }
+                  },
+                  {
+                    "resourceName": "数据交换时延",
+                    "resourceType": "DataTable",
+                    "columns": {
+                      "数据": "string",
+                      "时延": "int64"
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "resourceName": "节点资源树",
+            "resourceType": "ResourceObject",
+            "children": [
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

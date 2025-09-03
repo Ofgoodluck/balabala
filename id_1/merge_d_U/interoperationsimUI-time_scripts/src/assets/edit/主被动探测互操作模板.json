@@ -1,0 +1,15 @@
+{
+  "模板名称": "主被动雷达探测",
+  "互操作模板": [
+    "1 主动雷达平台 CREATE ResourceObject (resourceName: 主被动雷达探测) TO /root/任务列表;",
+    "3 主动雷达平台 START SERVICE BasicService(path:lib/libDelayResourceCreator.so, --from: /root/global/被动雷达平台1/装备列表/雷达/点迹信息, --to: /root/任务列表/主被动雷达探测, --resourceName: 获得的点迹信息_被动雷达平台1) AS 时延表创建智能体;",
+    "3 主动雷达平台 CONTROL SERVICE SendMessage(path:lib/libDelayResourceCreator.so, --from: /root/global/被动雷达平台2/装备列表/雷达/点迹信息, --to: /root/任务列表/主被动雷达探测, --resourceName: 获得的点迹信息_被动雷达平台2) TO 时延表创建智能体;",
+    "3 主动雷达平台 CONTROL SERVICE SendMessage(path:lib/libDelayResourceCreator.so, --from: /root/global/被动雷达平台3/装备列表/雷达/点迹信息, --to: /root/任务列表/主被动雷达探测, --resourceName: 获得的点迹信息_被动雷达平台3) TO 时延表创建智能体;",
+    "5 主动雷达平台 CREATE SUBSCRIPTION (eventType: updated, notificationContentType: modifiedAttribute) FROM /root/global/被动雷达平台1/装备列表/雷达/点迹信息 TO /root/任务列表/主被动雷达探测/获得的点迹信息_被动雷达平台1 SERVICE CommonProcess(path: lib/libDelayCalculator.so);",
+    "5 主动雷达平台 CREATE SUBSCRIPTION (eventType: updated, notificationContentType: modifiedAttribute) FROM /root/global/被动雷达平台2/装备列表/雷达/点迹信息 TO /root/任务列表/主被动雷达探测/获得的点迹信息_被动雷达平台2 SERVICE CommonProcess(path: lib/libDelayCalculator.so);",
+    "5 主动雷达平台 CREATE SUBSCRIPTION (eventType: updated, notificationContentType: modifiedAttribute) FROM /root/global/被动雷达平台3/装备列表/雷达/点迹信息 TO /root/任务列表/主被动雷达探测/获得的点迹信息_被动雷达平台3 SERVICE CommonProcess(path: lib/libDelayCalculator.so);",
+    "7 被动雷达平台1 RETRIEVE Attribute FROM /root/global/主动雷达平台/装备列表/雷达/雷达属性/频率 TO /root/装备列表/雷达/雷达属性/频率;",
+    "7 被动雷达平台2 RETRIEVE Attribute FROM /root/global/主动雷达平台/装备列表/雷达/雷达属性/频率 TO /root/装备列表/雷达/雷达属性/频率;",
+    "7 被动雷达平台3 RETRIEVE Attribute FROM /root/global/主动雷达平台/装备列表/雷达/雷达属性/频率 TO /root/装备列表/雷达/雷达属性/频率;"
+  ]
+}

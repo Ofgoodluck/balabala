@@ -1,0 +1,106 @@
+{
+  "第一次测试": {
+    "nodesSet": {
+      "node1": {
+        "role": "main",
+        "nodeId": "node1",
+        "ip": "192.168.1.1",
+        "name": "平台1",
+        "equipments": [
+          "红外装备"
+        ],
+        "applist": [
+          "计算应用"
+        ]
+      },
+      "node2": {
+        "role": "slave",
+        "nodeId": "node2",
+        "ip": "192.168.1.2",
+        "name": "平台2",
+        "equipments": [
+          "雷达装备"
+        ],
+        "applist": [
+          "融合应用"
+        ]
+      }
+    },
+    "edgesSet": {
+      "node2-node1": {
+        "id": "node2-node1",
+        "from": "node2",
+        "to": "node1",
+        "bandWidth": "100",
+        "delay": "20",
+        "lossRate": "3"
+      }
+    },
+    "graphContent": {
+      "nodes": [
+        {
+          "id": "node1",
+          "label": "node1",
+          "x": 545,
+          "y": 5
+        },
+        {
+          "id": "node2",
+          "label": "node2",
+          "x": 433,
+          "y": 117
+        }
+      ],
+      "edges": [
+        {
+          "id": "node2-node1",
+          "source": "node2",
+          "target": "node1",
+          "label": "带宽:100kb/s 时延:20ms 丢包率3%"
+        }
+      ]
+    },
+    "equipmentsSet": [
+      {
+        "name": "雷达装备",
+        "softwareIndex": "/usr/bin",
+        "softwarePath": "/usr/local",
+        "descriptionPath": "/usr/bin"
+      },
+      {
+        "name": "红外装备",
+        "softwareIndex": "/usr/bin",
+        "softwarePath": "/usr/local",
+        "descriptionPath": "/usr/bin"
+      },
+      {
+        "name": "干扰装备",
+        "softwareIndex": "/usr/bin",
+        "softwarePath": "/usr/local",
+        "descriptionPath": "/usr/bin"
+      }
+    ],
+    "appSet": [
+      {
+        "name": "融合应用",
+        "softwareIndex": "/usr/bin",
+        "softwarePath": "/usr/bin",
+        "descriptionPath": "/usr/bin"
+      },
+      {
+        "name": "计算应用",
+        "softwareIndex": "/usr/bin",
+        "softwarePath": "/usr/bin",
+        "descriptionPath": "/usr/bin"
+      },
+      {
+        "name": "核算应用",
+        "softwareIndex": "/usr/bin",
+        "softwarePath": "/usr/bin",
+        "descriptionPath": "/usr/bin"
+      }
+    ],
+    "resultSoftwarePath": "/usr/bin",
+    "interOperateTemplate": "/usr/bin"
+  }
+}

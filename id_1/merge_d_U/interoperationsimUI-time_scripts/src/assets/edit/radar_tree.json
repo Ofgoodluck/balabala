@@ -1,0 +1,54 @@
+{
+  "resourceTree": {
+    "resourceName": "雷达",
+    "resourceType": "ResourceObject",
+    "children": [
+      {
+        "resourceName": "雷达频点",
+        "resourceType": "Attribute",
+        "dataType": "float64",
+        "name": "radar_freq",
+        "data": 0.0
+      },
+      {
+        "resourceName": "雷达探测信息",
+        "resourceType": "DataTable",
+        "columns": {
+          "x": "float64",
+          "y": "float64",
+          "z": "float64",
+          "目标特征": "string",
+          "时间戳": "int64"
+        }
+      },
+      {
+        "resourceName": "当前置信度",
+        "resourceType": "Attribute",
+        "dataType": "float64",
+        "name": "confidence",
+        "data": 0.0
+      },
+      {
+        "resourceName": "软件评估结果",
+        "resourceType": "DataTable",
+        "columns": {
+          "应用名称": "string",
+          "置信度": "float64",
+          "置信度来源": "string"
+        },
+        "comment": "置信度来源: {'resource_to':delay_time, }"
+      }
+    ]
+  },
+  "resourceMapping": [
+    {
+      "tableId": "雷达/软件评估结果",
+      "mapping": [
+        {
+          "雷达/当前置信度": "置信度",
+          "serviceObject": "internal::copy"
+        }
+      ]
+    }
+  ]
+}

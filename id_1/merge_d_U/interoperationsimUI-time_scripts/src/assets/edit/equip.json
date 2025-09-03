@@ -1,0 +1,6 @@
+{
+  "装备名称": "雷达",
+  "装备软件目录": "./dockerFiles",
+  "装备数据发生器软件路径": "Test_Data_Generator",
+  "装备资源子树描述文件路径": "RadarPlot.json"
+}
