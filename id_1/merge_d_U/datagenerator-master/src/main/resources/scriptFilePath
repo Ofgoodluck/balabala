@@ -1,7 +1,0 @@
-xxAddresses=.\src\main\resources\xxAddresses.csv
-xxCoordinationEvent=.\src\main\resources\xxCoordinationEvent.csv
-xxCyberspaceEvents=.\src\main\resources\xxCyberspaceEvents.csv
-xxEnvironmentEvent=.\src\main\resources\xxEnvironmentEvent.csv
-xxInformation=.\src\main\resources\xxInformation.csv
-xxActiveRadarFrequency=.\src\main\resources\xxActiveRadarFrequency.csv
-xxDynamicResourceConfig=.\src\main\resources\xxDynamicResourceConfig.csv
