@@ -1,6 +1,0 @@
-# 设备ID,deviceHost,listenPort
-FlightController,192.168.18.1,6010
-ESMRadar,192.168.18.1,6011
-ActiveRadar,192.168.18.1,6012
-GuidanceRadar,192.168.18.1,6013
-Time,192.168.18.1,6014
