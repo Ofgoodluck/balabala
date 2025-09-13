@@ -1,6 +1,0 @@
-{
-  "应用名称": "雷达融合计算",
-  "应用软件目录": "./dockerFiles",
-  "软件路径": "confidence_app_radar",
-  "应用资源子树描述文件路径": "FusionCompute.json"
-}
