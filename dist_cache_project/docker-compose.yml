@@ -1,0 +1,72 @@
+version: "3.8"
+services:
+  proxy:
+    image: nginx:alpine
+    container_name: proxy
+    networks:
+      mynet:
+        ipv4_address: 172.20.0.20
+    extra_hosts:
+      - "server1:172.20.0.11"
+      - "server2:172.20.0.12"
+      - "server3:172.20.0.13"
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf
+    ports:
+      - "80:80"
+  cache1:
+    build: .
+    container_name: cache1
+    environment:
+      - NODE_NAME=cache1
+      - NODE_PORT=9527
+      - ALL_NODES=cache1:9527,cache2:9528,cache3:9529
+    ports:
+      - "9527:9527"
+    networks:
+      mynet:
+        ipv4_address: 172.20.0.11
+  cache2:
+    build: .
+    container_name: cache2
+    environment:
+      - NODE_NAME=cache2
+      - NODE_PORT=9528
+      - ALL_NODES=cache1:9527,cache2:9528,cache3:9529
+    ports:
+      - "9528:9528"
+    networks:
+      mynet:
+        ipv4_address: 172.20.0.12
+  cache3:
+    build: .
+    container_name: cache3
+    environment:
+      - NODE_NAME=cache3
+      - NODE_PORT=9529
+      - ALL_NODES=cache1:9527,cache2:9528,cache3:9529
+    ports:
+      - "9529:9529"
+    networks:
+      mynet:
+        ipv4_address: 172.20.0.13
+  alpine:
+    image: alpine
+    container_name: alpine
+    tty: true
+    stdin_open: true
+    extra_hosts:
+      - "server1:172.20.0.20"
+      - "server2:172.20.0.20"
+      - "server3:172.20.0.20"
+    command: sh -c "apk update && apk add --no-cache curl && sh"
+    networks:
+      mynet:
+        ipv4_address: 172.20.0.14
+
+networks:
+  mynet:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
