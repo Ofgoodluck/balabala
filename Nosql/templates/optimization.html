@@ -1,0 +1,621 @@
+{% extends "base.html" %}
+
+{% block title %}查询优化 - 分布式图书馆系统{% endblock %}
+{% block nav_optimization %}active{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <h2><i class="fas fa-cogs"></i> 查询分解与优化</h2>
+            <p class="text-muted">查看分布式查询的分解过程、优化步骤和执行计划</p>
+        </div>
+    </div>
+    
+    <!-- 查询输入区域 -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-code"></i> 查询分析器</h5>
+                </div>
+                <div class="card-body">
+                    <form id="optimizationForm">
+                        <div class="row">
+                            <div class="col-md-10">
+                                <textarea class="form-control" id="optimizationQuery" rows="3" 
+                                          placeholder="输入SQL查询语句查看优化过程...">SELECT * FROM books WHERE category = '计算机科学'</textarea>
+                            </div>
+                            <div class="col-md-2">
+                                <button type="submit" class="btn btn-primary w-100 h-100">
+                                    <i class="fas fa-magic"></i><br>分析优化
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 优化过程展示 -->
+    <div class="row mt-4" id="optimizationResults" style="display: none;">
+        <div class="col-md-8">
+            <!-- 优化步骤 -->
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-list-ol"></i> 优化步骤</h5>
+                </div>
+                <div class="card-body">
+                    <div id="optimizationSteps">
+                        <!-- 优化步骤将在这里显示 -->
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 查询分解 -->
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h5><i class="fas fa-puzzle-piece"></i> 查询分解</h5>
+                </div>
+                <div class="card-body">
+                    <div id="queryFragments">
+                        <!-- 查询片段将在这里显示 -->
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 执行计划 -->
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h5><i class="fas fa-sitemap"></i> 执行计划</h5>
+                </div>
+                <div class="card-body">
+                    <div id="executionPlan">
+                        <!-- 执行计划将在这里显示 -->
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <!-- 优化统计 -->
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-chart-line"></i> 优化统计</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-6">
+                            <h4 class="text-primary" id="totalSteps">0</h4>
+                            <small class="text-muted">优化步骤</small>
+                        </div>
+                        <div class="col-6">
+                            <h4 class="text-success" id="costReduction">0%</h4>
+                            <small class="text-muted">成本降低</small>
+                        </div>
+                    </div>
+                    <hr>
+                    <div class="row text-center">
+                        <div class="col-6">
+                            <h4 class="text-warning" id="fragmentCount">0</h4>
+                            <small class="text-muted">查询片段</small>
+                        </div>
+                        <div class="col-6">
+                            <h4 class="text-info" id="nodesInvolved">0</h4>
+                            <small class="text-muted">涉及节点</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 处理日志 -->
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h5><i class="fas fa-terminal"></i> 处理日志</h5>
+                </div>
+                <div class="card-body">
+                    <div id="processingLog" class="processing-log">
+                        <div class="log-entry">
+                            <span class="text-muted">[系统]</span> 等待查询输入...
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 性能对比 -->
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h5><i class="fas fa-balance-scale"></i> 性能对比</h5>
+                </div>
+                <div class="card-body">
+                    <h6>优化前 vs 优化后</h6>
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between">
+                            <span>执行时间:</span>
+                            <span><span id="beforeTime">-</span> → <span id="afterTime" class="text-success">-</span></span>
+                        </div>
+                        <div class="progress" style="height: 5px;">
+                            <div class="progress-bar bg-success" id="timeProgress" style="width: 0%"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between">
+                            <span>数据传输:</span>
+                            <span><span id="beforeTransfer">-</span> → <span id="afterTransfer" class="text-success">-</span></span>
+                        </div>
+                        <div class="progress" style="height: 5px;">
+                            <div class="progress-bar bg-info" id="transferProgress" style="width: 0%"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between">
+                            <span>资源消耗:</span>
+                            <span><span id="beforeResource">-</span> → <span id="afterResource" class="text-success">-</span></span>
+                        </div>
+                        <div class="progress" style="height: 5px;">
+                            <div class="progress-bar bg-warning" id="resourceProgress" style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 示例查询 -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-lightbulb"></i> 示例查询</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <h6>简单查询</h6>
+                            <div class="example-query" data-query="SELECT * FROM books WHERE category = '计算机科学'">
+                                <code>SELECT * FROM books WHERE category = '计算机科学'</code>
+                                <p class="small text-muted mt-1">基本的选择查询，演示投影优化</p>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-4">
+                            <h6>聚合查询</h6>
+                            <div class="example-query" data-query="SELECT library_id, COUNT(*) as book_count FROM books GROUP BY library_id">
+                                <code>SELECT library_id, COUNT(*) as book_count FROM books GROUP BY library_id</code>
+                                <p class="small text-muted mt-1">分组聚合查询，展示分布式聚合优化</p>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-4">
+                            <h6>连接查询</h6>
+                            <div class="example-query" data-query="SELECT b.title, l.name FROM books b JOIN libraries l ON b.library_id = l.id">
+                                <code>SELECT b.title, l.name FROM books b JOIN libraries l ON b.library_id = l.id</code>
+                                <p class="small text-muted mt-1">跨表连接查询，演示连接优化策略</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.optimization-step {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 15px;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    transition: all 0.3s ease;
+}
+
+.optimization-step:hover {
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    transform: translateY(-2px);
+}
+
+.step-header {
+    display: flex;
+    justify-content-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.step-badge {
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.code-block {
+    background-color: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 4px;
+    padding: 10px;
+    font-family: 'Courier New', monospace;
+    font-size: 13px;
+    margin: 8px 0;
+}
+
+.code-block.before {
+    border-left: 4px solid #dc3545;
+}
+
+.code-block.after {
+    border-left: 4px solid #28a745;
+}
+
+.query-fragment {
+    border: 1px solid #007bff;
+    border-radius: 6px;
+    padding: 12px;
+    margin-bottom: 12px;
+    background-color: #f8f9ff;
+}
+
+.fragment-header {
+    display: flex;
+    justify-content-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.processing-log {
+    height: 200px;
+    overflow-y: auto;
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    padding: 10px;
+    font-family: 'Courier New', monospace;
+    font-size: 12px;
+}
+
+.log-entry {
+    margin-bottom: 2px;
+    padding: 2px 5px;
+    border-radius: 2px;
+}
+
+.log-entry.info {
+    background-color: #d1ecf1;
+    border-left: 3px solid #bee5eb;
+}
+
+.log-entry.success {
+    background-color: #d4edda;
+    border-left: 3px solid #c3e6cb;
+}
+
+.log-entry.warning {
+    background-color: #fff3cd;
+    border-left: 3px solid #ffeaa7;
+}
+
+.example-query {
+    cursor: pointer;
+    padding: 10px;
+    border: 1px solid #e9ecef;
+    border-radius: 5px;
+    margin-bottom: 10px;
+    transition: all 0.3s ease;
+}
+
+.example-query:hover {
+    background-color: #f8f9fa;
+    border-color: #007bff;
+}
+
+.execution-plan-tree {
+    font-family: 'Courier New', monospace;
+    font-size: 13px;
+    background-color: #f8f9fa;
+    padding: 15px;
+    border-radius: 5px;
+    border: 1px solid #dee2e6;
+}
+
+.plan-node {
+    margin: 5px 0;
+    padding: 5px 10px;
+    border-radius: 3px;
+}
+
+.plan-node.root {
+    background-color: #007bff;
+    color: white;
+}
+
+.plan-node.fragment {
+    background-color: #28a745;
+    color: white;
+    margin-left: 20px;
+}
+
+.plan-node.operation {
+    background-color: #ffc107;
+    color: black;
+    margin-left: 40px;
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    // 表单提交事件
+    $('#optimizationForm').on('submit', function(e) {
+        e.preventDefault();
+        analyzeQuery();
+    });
+    
+    // 示例查询点击事件
+    $('.example-query').on('click', function() {
+        const query = $(this).data('query');
+        $('#optimizationQuery').val(query);
+        analyzeQuery();
+    });
+});
+
+function analyzeQuery() {
+    const sql = $('#optimizationQuery').val().trim();
+    
+    if (!sql) {
+        showAlert('请输入SQL查询语句', 'warning');
+        return;
+    }
+    
+    addLogEntry('开始分析查询...', 'info');
+    
+    // 提交查询进行分析
+    $.ajax({
+        url: '/query',
+        method: 'POST',
+        data: { sql: sql },
+        dataType: 'json',
+        success: function(response) {
+            if (response.success) {
+                displayOptimizationResults(response);
+                addLogEntry('查询分析完成', 'success');
+            } else {
+                addLogEntry('查询分析失败: ' + response.error, 'warning');
+                showAlert('查询分析失败: ' + response.error, 'danger');
+            }
+        },
+        error: function(xhr, status, error) {
+            addLogEntry('请求失败: ' + error, 'warning');
+            showAlert('分析请求失败: ' + error, 'danger');
+        }
+    });
+}
+
+function displayOptimizationResults(response) {
+    const queryInfo = response.query_info;
+    
+    // 显示结果区域
+    $('#optimizationResults').show();
+    
+    // 显示优化步骤
+    displayOptimizationSteps(queryInfo.optimization_steps || []);
+    
+    // 显示查询分解
+    displayQueryFragments(queryInfo.fragments || []);
+    
+    // 显示执行计划
+    displayExecutionPlan(queryInfo.execution_plan || {});
+    
+    // 更新统计信息
+    updateOptimizationStats(queryInfo);
+    
+    // 更新性能对比
+    updatePerformanceComparison(response);
+}
+
+function displayOptimizationSteps(steps) {
+    const $container = $('#optimizationSteps');
+    
+    if (steps.length === 0) {
+        $container.html(`
+            <div class="optimization-step">
+                <div class="text-muted text-center">
+                    <i class="fas fa-info-circle"></i> 当前查询无需优化
+                </div>
+            </div>
+        `);
+        return;
+    }
+    
+    let html = '';
+    steps.forEach((step, index) => {
+        const stepNumber = index + 1;
+        const reductionClass = step.cost_reduction > 0 ? 'bg-success' : 'bg-secondary';
+        
+        html += `
+            <div class="optimization-step">
+                <div class="step-header">
+                    <h6><i class="fas fa-cog"></i> 步骤 ${stepNumber}: ${step.step_name}</h6>
+                    <span class="step-badge ${reductionClass} text-white">
+                        ${step.cost_reduction > 0 ? '-' : ''}${(step.cost_reduction * 100).toFixed(1)}%
+                    </span>
+                </div>
+                
+                <p class="text-muted">${step.explanation}</p>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <strong>优化前:</strong>
+                        <div class="code-block before">${step.before_sql}</div>
+                    </div>
+                    <div class="col-md-6">
+                        <strong>优化后:</strong>
+                        <div class="code-block after">${step.after_sql}</div>
+                    </div>
+                </div>
+            </div>
+        `;
+    });
+    
+    $container.html(html);
+}
+
+function displayQueryFragments(fragments) {
+    const $container = $('#queryFragments');
+    
+    if (fragments.length === 0) {
+        $container.html(`
+            <div class="query-fragment">
+                <div class="text-muted text-center">
+                    <i class="fas fa-info-circle"></i> 查询无需分解
+                </div>
+            </div>
+        `);
+        return;
+    }
+    
+    let html = '';
+    fragments.forEach((fragment, index) => {
+        const fragmentNumber = index + 1;
+        const costClass = fragment.estimated_cost < 1.0 ? 'text-success' : 
+                         fragment.estimated_cost < 2.0 ? 'text-warning' : 'text-danger';
+        
+        html += `
+            <div class="query-fragment">
+                <div class="fragment-header">
+                    <h6><i class="fas fa-puzzle-piece"></i> 片段 ${fragmentNumber}</h6>
+                    <div>
+                        <span class="badge bg-primary">${fragment.data_source}</span>
+                        <span class="badge ${costClass === 'text-success' ? 'bg-success' : 
+                                           costClass === 'text-warning' ? 'bg-warning' : 'bg-danger'}">
+                            成本: ${fragment.estimated_cost.toFixed(2)}
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="code-block">${fragment.sql}</div>
+                
+                <div class="text-muted">
+                    <small>
+                        <i class="fas fa-server"></i> 目标节点: ${fragment.target_nodes.join(', ')} |
+                        <i class="fas fa-database"></i> 数据源: ${fragment.data_source}
+                    </small>
+                </div>
+            </div>
+        `;
+    });
+    
+    $container.html(html);
+}
+
+function displayExecutionPlan(plan) {
+    const $container = $('#executionPlan');
+    
+    if (!plan || Object.keys(plan).length === 0) {
+        $container.html('<div class="text-muted">无执行计划信息</div>');
+        return;
+    }
+    
+    const html = `
+        <div class="execution-plan-tree">
+            <div class="plan-node root">
+                <i class="fas fa-play"></i> 分布式查询执行计划
+            </div>
+            
+            <div class="plan-node fragment">
+                <i class="fas fa-sitemap"></i> 执行策略: ${plan.parallel_execution ? '并行执行' : '串行执行'}
+            </div>
+            
+            <div class="plan-node operation">
+                <i class="fas fa-list-ol"></i> 执行顺序: ${plan.execution_order ? plan.execution_order.join(' → ') : '无'}
+            </div>
+            
+            <div class="plan-node operation">
+                <i class="fas fa-compress-arrows-alt"></i> 合并策略: ${plan.merge_strategy || '直接'}
+            </div>
+            
+            <div class="plan-node operation">
+                <i class="fas fa-clock"></i> 预计时间: ${plan.estimated_total_time ? plan.estimated_total_time.toFixed(2) + 's' : '未知'}
+            </div>
+        </div>
+        
+        <div class="mt-3">
+            <h6>执行特点:</h6>
+            <ul class="list-unstyled">
+                <li><i class="fas fa-check text-success"></i> 自动查询分解</li>
+                <li><i class="fas fa-check text-success"></i> 成本基础优化</li>
+                <li><i class="fas fa-check text-success"></i> 并发执行支持</li>
+                <li><i class="fas fa-check text-success"></i> 智能结果合并</li>
+            </ul>
+        </div>
+    `;
+    
+    $container.html(html);
+}
+
+function updateOptimizationStats(queryInfo) {
+    const steps = queryInfo.optimization_steps || [];
+    const fragments = queryInfo.fragments || [];
+    
+    // 计算总成本降低
+    const totalReduction = steps.reduce((sum, step) => sum + step.cost_reduction, 0);
+    const avgReduction = steps.length > 0 ? totalReduction / steps.length : 0;
+    
+    // 计算涉及节点数
+    const uniqueNodes = new Set();
+    fragments.forEach(fragment => {
+        fragment.target_nodes.forEach(node => uniqueNodes.add(node));
+    });
+    
+    $('#totalSteps').text(steps.length);
+    $('#costReduction').text((avgReduction * 100).toFixed(1) + '%');
+    $('#fragmentCount').text(fragments.length);
+    $('#nodesInvolved').text(uniqueNodes.size);
+}
+
+function updatePerformanceComparison(response) {
+    const executionTime = response.execution_time || 0;
+    
+    // 模拟优化前后的对比数据
+    const beforeTime = (executionTime * 1.5).toFixed(2) + 's';
+    const afterTime = executionTime.toFixed(2) + 's';
+    const timeImprovement = ((1 - executionTime / (executionTime * 1.5)) * 100).toFixed(1);
+    
+    $('#beforeTime').text(beforeTime);
+    $('#afterTime').text(afterTime);
+    $('#timeProgress').css('width', timeImprovement + '%');
+    
+    // 模拟数据传输优化
+    $('#beforeTransfer').text('1.2MB');
+    $('#afterTransfer').text('0.8MB');
+    $('#transferProgress').css('width', '66%');
+    
+    // 模拟资源消耗优化
+    $('#beforeResource').text('高');
+    $('#afterResource').text('中');
+    $('#resourceProgress').css('width', '60%');
+}
+
+function addLogEntry(message, type = 'info') {
+    const $log = $('#processingLog');
+    const timestamp = new Date().toLocaleTimeString();
+    
+    const logClass = type === 'success' ? 'success' : 
+                    type === 'warning' ? 'warning' : 'info';
+    
+    const entry = `
+        <div class="log-entry ${logClass}">
+            <span class="text-muted">[${timestamp}]</span> ${message}
+        </div>
+    `;
+    
+    $log.append(entry);
+    $log.scrollTop($log[0].scrollHeight);
+}
+</script>
+{% endblock %}

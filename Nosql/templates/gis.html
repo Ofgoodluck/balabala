@@ -1,0 +1,585 @@
+{% extends "base.html" %}
+
+{% block title %}地理信息系统 - 分布式图书馆系统{% endblock %}
+{% block nav_gis %}active{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <h2><i class="fas fa-map-marker-alt"></i> 地理信息系统</h2>
+            <p class="text-muted">基于GIS的成都高校图书馆分布可视化和空间查询</p>
+        </div>
+    </div>
+    
+    <div class="row">
+        <!-- 地图显示区域 -->
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-map"></i> 图书馆分布地图</h5>
+                    <div class="float-end">
+                        <div class="btn-group" role="group">
+                            <button type="button" class="btn btn-sm btn-outline-primary" onclick="switchMapView('normal')">
+                                <i class="fas fa-map"></i> 标准地图
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-primary" onclick="switchMapView('heatmap')">
+                                <i class="fas fa-fire"></i> 热力图
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-primary" onclick="exportGISData()">
+                                <i class="fas fa-download"></i> 导出数据
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <div id="map-container" class="map-container">
+                        {{ map_html|safe }}
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 空间查询结果 -->
+            <div class="card mt-4" id="spatialResultsCard" style="display: none;">
+                <div class="card-header">
+                    <h5><i class="fas fa-search-location"></i> 空间查询结果</h5>
+                </div>
+                <div class="card-body">
+                    <div id="spatialResults"></div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 控制面板 -->
+        <div class="col-md-4">
+            <!-- 图书馆列表 -->
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-list"></i> 图书馆列表</h5>
+                </div>
+                <div class="card-body">
+                    {% for library in libraries %}
+                    <div class="library-item mb-3" data-library-id="{{ library.id }}">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <h6 class="mb-1">{{ library.name }}</h6>
+                                <small class="text-muted">{{ library.address }}</small>
+                            </div>
+                            <button class="btn btn-sm btn-outline-primary" onclick="highlightLibrary('{{ library.id }}')">
+                                <i class="fas fa-map-pin"></i>
+                            </button>
+                        </div>
+                        
+                        <div class="mt-2">
+                            <div class="row text-center">
+                                <div class="col-6">
+                                    <small class="text-muted">纬度</small><br>
+                                    <code>{{ "%.4f"|format(library.latitude) }}</code>
+                                </div>
+                                <div class="col-6">
+                                    <small class="text-muted">经度</small><br>
+                                    <code>{{ "%.4f"|format(library.longitude) }}</code>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-2">
+                            <small class="text-muted">特色:</small>
+                            {% for specialty in library.specialties %}
+                                <span class="badge bg-light text-dark">{{ specialty }}</span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    
+                    {% if not loop.last %}
+                        <hr>
+                    {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <!-- 空间查询工具 -->
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h5><i class="fas fa-search-location"></i> 空间查询</h5>
+                </div>
+                <div class="card-body">
+                    <!-- 最近图书馆查询 -->
+                    <div class="mb-4">
+                        <h6>查找最近的图书馆</h6>
+                        <div class="row">
+                            <div class="col-6">
+                                <input type="number" class="form-control form-control-sm" 
+                                       id="searchLat" placeholder="纬度" step="0.0001">
+                            </div>
+                            <div class="col-6">
+                                <input type="number" class="form-control form-control-sm" 
+                                       id="searchLng" placeholder="经度" step="0.0001">
+                            </div>
+                        </div>
+                        <div class="mt-2">
+                            <button class="btn btn-sm btn-primary w-100" onclick="findNearestLibraries()">
+                                <i class="fas fa-search"></i> 查找最近图书馆
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- 半径范围查询 -->
+                    <div class="mb-4">
+                        <h6>范围内图书馆查询</h6>
+                        <div class="mb-2">
+                            <label class="form-label">搜索半径 (公里)</label>
+                            <select class="form-select form-select-sm" id="searchRadius">
+                                <option value="1">1 公里</option>
+                                <option value="2">2 公里</option>
+                                <option value="5" selected>5 公里</option>
+                                <option value="10">10 公里</option>
+                                <option value="20">20 公里</option>
+                            </select>
+                        </div>
+                        <button class="btn btn-sm btn-success w-100" onclick="findLibrariesInRadius()">
+                            <i class="fas fa-circle"></i> 半径范围查询
+                        </button>
+                    </div>
+                    
+                    <!-- 路径规划 -->
+                    <div class="mb-4">
+                        <h6>路径规划</h6>
+                        <div class="mb-2">
+                            <select class="form-select form-select-sm" id="startLibrary">
+                                <option value="">选择起始图书馆</option>
+                                {% for library in libraries %}
+                                <option value="{{ library.id }}">{{ library.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="mb-2">
+                            <select class="form-select form-select-sm" id="endLibrary">
+                                <option value="">选择目标图书馆</option>
+                                {% for library in libraries %}
+                                <option value="{{ library.id }}">{{ library.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <button class="btn btn-sm btn-warning w-100" onclick="planRoute()">
+                            <i class="fas fa-route"></i> 规划路径
+                        </button>
+                    </div>
+                    
+                    <!-- 快速定位 -->
+                    <div>
+                        <h6>快速定位</h6>
+                        <div class="d-grid gap-2">
+                            <button class="btn btn-sm btn-outline-secondary" onclick="locateToChengdu()">
+                                <i class="fas fa-map-marker"></i> 成都市中心
+                            </button>
+                            <button class="btn btn-sm btn-outline-secondary" onclick="getCurrentLocation()">
+                                <i class="fas fa-location-arrow"></i> 我的位置
+                            </button>
+                            <button class="btn btn-sm btn-outline-secondary" onclick="fitAllLibraries()">
+                                <i class="fas fa-expand-arrows-alt"></i> 查看全部
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 统计信息 -->
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h5><i class="fas fa-chart-bar"></i> 地理统计</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-6">
+                            <h4 class="text-primary">{{ libraries|length }}</h4>
+                            <small class="text-muted">图书馆总数</small>
+                        </div>
+                        <div class="col-6">
+                            <h4 class="text-success">11.2km</h4>
+                            <small class="text-muted">覆盖范围</small>
+                        </div>
+                    </div>
+                    
+                    <hr>
+                    
+                    <div class="mb-2">
+                        <strong>平均距离:</strong> 
+                        <span class="float-end">8.5 km</span>
+                    </div>
+                    <div class="mb-2">
+                        <strong>网络连接:</strong> 
+                        <span class="float-end">3 条</span>
+                    </div>
+                    <div class="mb-2">
+                        <strong>服务重叠:</strong> 
+                        <span class="float-end">2 处</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 库详情模态框 -->
+<div class="modal fade" id="libraryDetailModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">图书馆详细信息</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="libraryDetailContent">
+                <!-- 内容将通过JavaScript填充 -->
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.library-item {
+    border: 1px solid #e9ecef;
+    border-radius: 5px;
+    padding: 10px;
+    transition: all 0.3s ease;
+}
+
+.library-item:hover {
+    background-color: #f8f9fa;
+    border-color: #3498db;
+}
+
+.library-item.highlighted {
+    background-color: #e3f2fd;
+    border-color: #2196f3;
+}
+
+#map-container iframe {
+    width: 100%;
+    height: 500px;
+    border: none;
+}
+
+.spatial-result-item {
+    border-left: 3px solid #3498db;
+    padding-left: 10px;
+    margin-bottom: 10px;
+}
+
+.distance-badge {
+    background-color: #17a2b8;
+    color: white;
+    padding: 2px 6px;
+    border-radius: 10px;
+    font-size: 10px;
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let currentLibraryId = null;
+
+$(document).ready(function() {
+    // 初始化地图事件
+    setupMapInteractions();
+});
+
+function highlightLibrary(libraryId) {
+    // 清除之前的高亮
+    $('.library-item').removeClass('highlighted');
+    
+    // 高亮当前选中的图书馆
+    $(`.library-item[data-library-id="${libraryId}"]`).addClass('highlighted');
+    
+    currentLibraryId = libraryId;
+    
+    // 这里可以添加地图高亮逻辑
+    showAlert(`已选中图书馆: ${libraryId}`, 'info');
+}
+
+function findNearestLibraries() {
+    const lat = parseFloat($('#searchLat').val());
+    const lng = parseFloat($('#searchLng').val());
+    
+    if (!lat || !lng) {
+        showAlert('请输入有效的经纬度', 'warning');
+        return;
+    }
+    
+    const queryData = {
+        type: 'nearest_libraries',
+        params: {
+            latitude: lat,
+            longitude: lng,
+            limit: 3
+        }
+    };
+    
+    executeSpatialQuery(queryData);
+}
+
+function findLibrariesInRadius() {
+    const lat = parseFloat($('#searchLat').val());
+    const lng = parseFloat($('#searchLng').val());
+    const radius = parseFloat($('#searchRadius').val());
+    
+    if (!lat || !lng) {
+        showAlert('请输入有效的经纬度', 'warning');
+        return;
+    }
+    
+    const queryData = {
+        type: 'libraries_in_radius',
+        params: {
+            latitude: lat,
+            longitude: lng,
+            radius: radius
+        }
+    };
+    
+    executeSpatialQuery(queryData);
+}
+
+function planRoute() {
+    const startLibrary = $('#startLibrary').val();
+    const endLibrary = $('#endLibrary').val();
+    
+    if (!startLibrary || !endLibrary) {
+        showAlert('请选择起始和目标图书馆', 'warning');
+        return;
+    }
+    
+    if (startLibrary === endLibrary) {
+        showAlert('起始和目标图书馆不能相同', 'warning');
+        return;
+    }
+    
+    const queryData = {
+        type: 'route_planning',
+        params: {
+            start: startLibrary,
+            end: endLibrary
+        }
+    };
+    
+    executeSpatialQuery(queryData);
+}
+
+function executeSpatialQuery(queryData) {
+    $.ajax({
+        url: '/api/gis/spatial_query',
+        method: 'POST',
+        data: JSON.stringify(queryData),
+        contentType: 'application/json',
+        dataType: 'json',
+        success: function(response) {
+            if (response.success) {
+                displaySpatialResults(response.results, queryData.type);
+                showAlert('空间查询执行成功', 'success');
+            } else {
+                showAlert('查询失败: ' + response.error, 'danger');
+            }
+        },
+        error: function(xhr, status, error) {
+            showAlert('查询请求失败: ' + error, 'danger');
+        }
+    });
+}
+
+function displaySpatialResults(results, queryType) {
+    const $resultsCard = $('#spatialResultsCard');
+    const $resultsContainer = $('#spatialResults');
+    
+    let html = '';
+    
+    if (queryType === 'nearest_libraries' || queryType === 'libraries_in_radius') {
+        if (results.length === 0) {
+            html = '<p class="text-muted">未找到符合条件的图书馆</p>';
+        } else {
+            html = '<h6>找到的图书馆:</h6>';
+            results.forEach(library => {
+                html += `
+                    <div class="spatial-result-item">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <h6>${library.name}</h6>
+                                <small class="text-muted">${library.address}</small>
+                            </div>
+                            <span class="distance-badge">${library.distance} km</span>
+                        </div>
+                        <div class="mt-2">
+                            <small class="text-muted">特色: ${library.specialties.join(', ')}</small>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+    } else if (queryType === 'route_planning') {
+        if (results.length === 0) {
+            html = '<p class="text-muted">无法规划路径</p>';
+        } else {
+            const route = results[0];
+            html = `
+                <h6>路径规划结果:</h6>
+                <div class="spatial-result-item">
+                    <div class="row">
+                        <div class="col-6">
+                            <strong>起点:</strong><br>
+                            <small>${route.start_library}</small>
+                        </div>
+                        <div class="col-6">
+                            <strong>终点:</strong><br>
+                            <small>${route.end_library}</small>
+                        </div>
+                    </div>
+                    <div class="row mt-2">
+                        <div class="col-6">
+                            <strong>距离:</strong> ${route.distance} km
+                        </div>
+                        <div class="col-6">
+                            <strong>预计时间:</strong> ${route.estimated_time} 分钟
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+    }
+    
+    $resultsContainer.html(html);
+    $resultsCard.show();
+}
+
+function switchMapView(viewType) {
+    if (viewType === 'heatmap') {
+        $.ajax({
+            url: '/api/gis/heatmap',
+            method: 'GET',
+            dataType: 'json',
+            success: function(response) {
+                $('#map-container').html(response.heatmap_html);
+                showAlert('已切换到热力图视图', 'info');
+            },
+            error: function(xhr, status, error) {
+                showAlert('切换视图失败: ' + error, 'danger');
+            }
+        });
+    } else {
+        // 刷新到标准地图
+        location.reload();
+    }
+}
+
+function exportGISData() {
+    // 创建GeoJSON数据并下载
+    const geoJsonData = {
+        "type": "FeatureCollection",
+        "features": [
+            {% for library in libraries %}
+            {
+                "type": "Feature",
+                "geometry": {
+                    "type": "Point",
+                    "coordinates": [{{ library.longitude }}, {{ library.latitude }}]
+                },
+                "properties": {
+                    "name": "{{ library.name }}",
+                    "address": "{{ library.address }}",
+                    "specialties": {{ library.specialties|tojson }}
+                }
+            }{% if not loop.last %},{% endif %}
+            {% endfor %}
+        ]
+    };
+    
+    const dataStr = JSON.stringify(geoJsonData, null, 2);
+    const dataBlob = new Blob([dataStr], {type: 'application/json'});
+    const url = URL.createObjectURL(dataBlob);
+    
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'libraries_gis_data.geojson';
+    link.click();
+    
+    showAlert('GIS数据已导出', 'success');
+}
+
+function locateToChengdu() {
+    // 定位到成都市中心
+    showAlert('已定位到成都市中心', 'info');
+    // 这里可以添加地图定位逻辑
+}
+
+function getCurrentLocation() {
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(function(position) {
+            const lat = position.coords.latitude;
+            const lng = position.coords.longitude;
+            
+            $('#searchLat').val(lat.toFixed(6));
+            $('#searchLng').val(lng.toFixed(6));
+            
+            showAlert(`已获取当前位置: ${lat.toFixed(4)}, ${lng.toFixed(4)}`, 'success');
+        }, function(error) {
+            showAlert('无法获取当前位置: ' + error.message, 'warning');
+        });
+    } else {
+        showAlert('浏览器不支持地理定位', 'warning');
+    }
+}
+
+function fitAllLibraries() {
+    showAlert('已调整视图显示所有图书馆', 'info');
+    // 这里可以添加地图缩放逻辑
+}
+
+function showLibraryDetails(libraryId) {
+    // 这个函数可以被地图弹出窗口调用
+    const library = {{ libraries|tojson }}.find(lib => lib.id === libraryId);
+    
+    if (library) {
+        const detailHtml = `
+            <div class="row">
+                <div class="col-md-6">
+                    <h6>基本信息</h6>
+                    <p><strong>名称:</strong> ${library.name}</p>
+                    <p><strong>地址:</strong> ${library.address}</p>
+                    <p><strong>坐标:</strong> ${library.latitude.toFixed(4)}, ${library.longitude.toFixed(4)}</p>
+                </div>
+                <div class="col-md-6">
+                    <h6>服务信息</h6>
+                    <p><strong>开放时间:</strong> ${library.opening_hours || '08:00-22:00'}</p>
+                    <p><strong>联系电话:</strong> ${library.contact_phone || '028-85405110'}</p>
+                </div>
+            </div>
+            <div class="row mt-3">
+                <div class="col-12">
+                    <h6>专业特色</h6>
+                    <div>
+                        ${library.specialties.map(s => `<span class="badge bg-primary me-1">${s}</span>`).join('')}
+                    </div>
+                </div>
+            </div>
+            <div class="row mt-3">
+                <div class="col-12">
+                    <h6>提供服务</h6>
+                    <div>
+                        ${library.services.map(s => `<span class="badge bg-success me-1">${s}</span>`).join('')}
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        $('#libraryDetailContent').html(detailHtml);
+        $('#libraryDetailModal').modal('show');
+    }
+}
+
+function setupMapInteractions() {
+    // 设置地图交互事件
+    // 这里可以添加与地图框架的交互逻辑
+}
+</script>
+{% endblock %}

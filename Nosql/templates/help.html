@@ -1,0 +1,573 @@
+{% extends "base.html" %}
+
+{% block title %}帮助文档 - 分布式图书馆系统{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <h2><i class="fas fa-question-circle"></i> 系统帮助文档</h2>
+            <p class="text-muted">分布式图书馆系统使用指南和技术说明</p>
+        </div>
+    </div>
+    
+    <div class="row">
+        <!-- 目录导航 -->
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-list"></i> 文档目录</h5>
+                </div>
+                <div class="card-body">
+                    <nav class="nav nav-pills flex-column">
+                        <a class="nav-link active" href="#overview">系统概述</a>
+                        <a class="nav-link" href="#architecture">系统架构</a>
+                        <a class="nav-link" href="#features">核心功能</a>
+                        <a class="nav-link" href="#query">SQL查询</a>
+                        <a class="nav-link" href="#gis">GIS功能</a>
+                        <a class="nav-link" href="#library">图书管理</a>
+                        <a class="nav-link" href="#monitoring">系统监控</a>
+                        <a class="nav-link" href="#troubleshooting">问题排查</a>
+                        <a class="nav-link" href="#api">API接口</a>
+                    </nav>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 文档内容 -->
+        <div class="col-md-9">
+            <!-- 系统概述 -->
+            <section id="overview" class="help-section">
+                <div class="card">
+                    <div class="card-header">
+                        <h4><i class="fas fa-info-circle"></i> 系统概述</h4>
+                    </div>
+                    <div class="card-body">
+                        <p>{{ content.system_overview }}</p>
+                        
+                        <h5>主要特性</h5>
+                        <ul>
+                            {% for feature in content.features %}
+                            <li>{{ feature }}</li>
+                            {% endfor %}
+                        </ul>
+                        
+                        <h5>技术栈</h5>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <strong>后端技术:</strong>
+                                <ul>
+                                    <li>Flask Web框架</li>
+                                    <li>SQLite数据库</li>
+                                    <li>Python多线程</li>
+                                    <li>分布式查询处理</li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <strong>前端技术:</strong>
+                                <ul>
+                                    <li>Bootstrap 5 UI框架</li>
+                                    <li>Folium地图库</li>
+                                    <li>Chart.js图表库</li>
+                                    <li>jQuery JavaScript库</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- 系统架构 -->
+            <section id="architecture" class="help-section">
+                <div class="card">
+                    <div class="card-header">
+                        <h4><i class="fas fa-sitemap"></i> 系统架构</h4>
+                    </div>
+                    <div class="card-body">
+                        <h5>分布式架构设计</h5>
+                        <p>系统采用分布式架构，包含以下组件：</p>
+                        
+                        <div class="row">
+                            <div class="col-md-4">
+                                <h6 class="text-primary">主控制节点</h6>
+                                <ul>
+                                    <li>查询分解与优化</li>
+                                    <li>请求路由</li>
+                                    <li>结果合并</li>
+                                    <li>系统监控</li>
+                                </ul>
+                            </div>
+                            
+                            <div class="col-md-8">
+                                <h6 class="text-success">数据节点</h6>
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <strong>Node 1 - 四川大学</strong>
+                                        <ul class="small">
+                                            <li>文学类图书</li>
+                                            <li>历史哲学</li>
+                                            <li>综合性藏书</li>
+                                        </ul>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <strong>Node 2 - 电子科大</strong>
+                                        <ul class="small">
+                                            <li>计算机科学</li>
+                                            <li>电子工程</li>
+                                            <li>信息技术</li>
+                                        </ul>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <strong>Node 3 - 西南交大</strong>
+                                        <ul class="small">
+                                            <li>交通运输</li>
+                                            <li>土木工程</li>
+                                            <li>工程技术</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <h5 class="mt-4">数据分片策略</h5>
+                        <div class="table-responsive">
+                            <table class="table table-bordered">
+                                <thead>
+                                    <tr>
+                                        <th>分片类型</th>
+                                        <th>说明</th>
+                                        <th>适用场景</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>水平分片</td>
+                                        <td>按library_id分割数据行</td>
+                                        <td>单表大数据量查询</td>
+                                    </tr>
+                                    <tr>
+                                        <td>垂直分片</td>
+                                        <td>不同表存储在不同节点</td>
+                                        <td>多表联合查询</td>
+                                    </tr>
+                                    <tr>
+                                        <td>混合分片</td>
+                                        <td>结合水平和垂直分片</td>
+                                        <td>复杂查询场景</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- 核心功能 -->
+            <section id="features" class="help-section">
+                <div class="card">
+                    <div class="card-header">
+                        <h4><i class="fas fa-star"></i> 核心功能</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h5>分布式查询</h5>
+                                <ul>
+                                    <li>自动查询分解</li>
+                                    <li>基于成本的优化</li>
+                                    <li>并发执行</li>
+                                    <li>结果智能合并</li>
+                                </ul>
+                                
+                                <h5 class="mt-3">地理信息系统</h5>
+                                <ul>
+                                    <li>图书馆地理位置可视化</li>
+                                    <li>空间查询功能</li>
+                                    <li>路径规划</li>
+                                    <li>热力图分析</li>
+                                </ul>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <h5>图书管理</h5>
+                                <ul>
+                                    <li>跨校图书搜索</li>
+                                    <li>借阅归还管理</li>
+                                    <li>库存实时监控</li>
+                                    <li>统计分析报告</li>
+                                </ul>
+                                
+                                <h5 class="mt-3">系统监控</h5>
+                                <ul>
+                                    <li>节点状态监控</li>
+                                    <li>实时命令日志</li>
+                                    <li>性能统计分析</li>
+                                    <li>事务记录追踪</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- SQL查询 -->
+            <section id="query" class="help-section">
+                <div class="card">
+                    <div class="card-header">
+                        <h4><i class="fas fa-search"></i> SQL查询指南</h4>
+                    </div>
+                    <div class="card-body">
+                        <h5>支持的SQL语句</h5>
+                        <ul>
+                            <li>SELECT 查询语句</li>
+                            <li>WHERE 条件过滤</li>
+                            <li>GROUP BY 分组聚合</li>
+                            <li>ORDER BY 结果排序</li>
+                            <li>简单的JOIN连接</li>
+                        </ul>
+                        
+                        <h5>数据表结构</h5>
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>表名</th>
+                                        <th>主要字段</th>
+                                        <th>说明</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><code>books</code></td>
+                                        <td>id, title, author, isbn, category, library_id</td>
+                                        <td>图书基本信息</td>
+                                    </tr>
+                                    <tr>
+                                        <td><code>libraries</code></td>
+                                        <td>id, name, address, latitude, longitude</td>
+                                        <td>图书馆信息</td>
+                                    </tr>
+                                    <tr>
+                                        <td><code>users</code></td>
+                                        <td>id, student_id, name, school, email</td>
+                                        <td>用户信息</td>
+                                    </tr>
+                                    <tr>
+                                        <td><code>borrowings</code></td>
+                                        <td>id, user_id, book_id, borrow_date, status</td>
+                                        <td>借阅记录</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <h5>示例查询</h5>
+                        <div class="row">
+                            {% for query in content.sample_queries %}
+                            <div class="col-12 mb-2">
+                                <div class="bg-light p-2 rounded">
+                                    <code>{{ query }}</code>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        
+                        <h5 class="mt-3">查询优化提示</h5>
+                        <div class="alert alert-info">
+                            <ul class="mb-0">
+                                <li>尽量使用具体字段而非SELECT *</li>
+                                <li>添加WHERE条件减少数据传输</li>
+                                <li>GROUP BY查询会自动优化聚合操作</li>
+                                <li>系统会自动选择最优执行计划</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- GIS功能 -->
+            <section id="gis" class="help-section">
+                <div class="card">
+                    <div class="card-header">
+                        <h4><i class="fas fa-map"></i> GIS地理信息功能</h4>
+                    </div>
+                    <div class="card-body">
+                        <h5>地图功能</h5>
+                        <ul>
+                            <li><strong>标准地图:</strong> 显示图书馆位置和连接</li>
+                            <li><strong>热力图:</strong> 显示活动密度分布</li>
+                            <li><strong>交互标记:</strong> 点击查看详细信息</li>
+                            <li><strong>图例说明:</strong> 符号含义说明</li>
+                        </ul>
+                        
+                        <h5>空间查询</h5>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6>最近图书馆查询</h6>
+                                <ol>
+                                    <li>输入目标坐标</li>
+                                    <li>设置搜索数量</li>
+                                    <li>执行查询</li>
+                                    <li>查看距离排序结果</li>
+                                </ol>
+                            </div>
+                            <div class="col-md-6">
+                                <h6>半径范围查询</h6>
+                                <ol>
+                                    <li>输入中心坐标</li>
+                                    <li>选择搜索半径</li>
+                                    <li>执行查询</li>
+                                    <li>查看范围内图书馆</li>
+                                </ol>
+                            </div>
+                        </div>
+                        
+                        <h5>路径规划</h5>
+                        <p>支持任意两个图书馆之间的路径规划，提供距离和预计时间信息。</p>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- 图书管理 -->
+            <section id="library" class="help-section">
+                <div class="card">
+                    <div class="card-header">
+                        <h4><i class="fas fa-books"></i> 图书管理功能</h4>
+                    </div>
+                    <div class="card-body">
+                        <h5>图书搜索</h5>
+                        <ul>
+                            <li>支持书名、作者、ISBN搜索</li>
+                            <li>实时显示可借数量</li>
+                            <li>跨校资源统一检索</li>
+                            <li>一键借阅功能</li>
+                        </ul>
+                        
+                        <h5>借阅流程</h5>
+                        <ol>
+                            <li>搜索目标图书</li>
+                            <li>确认可借状态</li>
+                            <li>输入用户信息</li>
+                            <li>完成借阅登记</li>
+                        </ol>
+                        
+                        <h5>统计分析</h5>
+                        <ul>
+                            <li>藏书分类统计</li>
+                            <li>借阅趋势分析</li>
+                            <li>热门图书排行</li>
+                            <li>跨校共享数据</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- 系统监控 -->
+            <section id="monitoring" class="help-section">
+                <div class="card">
+                    <div class="card-header">
+                        <h4><i class="fas fa-tachometer-alt"></i> 系统监控说明</h4>
+                    </div>
+                    <div class="card-body">
+                        <h5>监控指标</h5>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <strong>性能指标:</strong>
+                                <ul>
+                                    <li>查询响应时间</li>
+                                    <li>系统吞吐量</li>
+                                    <li>成功率统计</li>
+                                    <li>资源使用率</li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <strong>运行状态:</strong>
+                                <ul>
+                                    <li>节点在线状态</li>
+                                    <li>网络连接情况</li>
+                                    <li>数据同步状态</li>
+                                    <li>系统运行时长</li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <h5>日志系统</h5>
+                        <ul>
+                            <li><strong>命令日志:</strong> 记录所有SQL执行</li>
+                            <li><strong>事务日志:</strong> 记录分布式事务</li>
+                            <li><strong>错误日志:</strong> 记录系统异常</li>
+                            <li><strong>性能日志:</strong> 记录性能数据</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- 问题排查 -->
+            <section id="troubleshooting" class="help-section">
+                <div class="card">
+                    <div class="card-header">
+                        <h4><i class="fas fa-wrench"></i> 常见问题排查</h4>
+                    </div>
+                    <div class="card-body">
+                        <h5>查询问题</h5>
+                        <div class="table-responsive">
+                            <table class="table table-bordered">
+                                <thead>
+                                    <tr>
+                                        <th>问题</th>
+                                        <th>可能原因</th>
+                                        <th>解决方案</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>查询超时</td>
+                                        <td>网络延迟或数据量过大</td>
+                                        <td>添加WHERE条件，减少数据量</td>
+                                    </tr>
+                                    <tr>
+                                        <td>语法错误</td>
+                                        <td>SQL语句格式不正确</td>
+                                        <td>检查SQL语法，参考示例</td>
+                                    </tr>
+                                    <tr>
+                                        <td>无查询结果</td>
+                                        <td>条件过于严格或数据不存在</td>
+                                        <td>放宽查询条件或检查数据</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <h5>系统问题</h5>
+                        <ul>
+                            <li><strong>节点离线:</strong> 检查网络连接，重启节点服务</li>
+                            <li><strong>地图不显示:</strong> 检查浏览器JavaScript支持</li>
+                            <li><strong>响应缓慢:</strong> 检查系统负载，考虑查询优化</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- API接口 -->
+            <section id="api" class="help-section">
+                <div class="card">
+                    <div class="card-header">
+                        <h4><i class="fas fa-code"></i> API接口文档</h4>
+                    </div>
+                    <div class="card-body">
+                        <h5>查询接口</h5>
+                        <div class="bg-light p-3 rounded">
+                            <strong>POST /query</strong><br>
+                            <small>参数: sql (查询语句)</small><br>
+                            <small>返回: 查询结果和执行信息</small>
+                        </div>
+                        
+                        <h5 class="mt-3">图书管理接口</h5>
+                        <div class="bg-light p-3 rounded">
+                            <strong>POST /api/books/search</strong><br>
+                            <small>参数: search_term, search_type</small><br>
+                            <small>返回: 匹配的图书列表</small>
+                        </div>
+                        
+                        <h5 class="mt-3">GIS接口</h5>
+                        <div class="bg-light p-3 rounded">
+                            <strong>POST /api/gis/spatial_query</strong><br>
+                            <small>参数: type, params</small><br>
+                            <small>返回: 空间查询结果</small>
+                        </div>
+                        
+                        <h5 class="mt-3">监控接口</h5>
+                        <div class="bg-light p-3 rounded">
+                            <strong>GET /api/statistics</strong><br>
+                            <small>返回: 系统统计信息</small>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.help-section {
+    margin-bottom: 30px;
+}
+
+.nav-pills .nav-link {
+    color: #495057;
+    border-radius: 4px;
+    margin-bottom: 5px;
+}
+
+.nav-pills .nav-link:hover {
+    background-color: #e9ecef;
+}
+
+.nav-pills .nav-link.active {
+    background-color: #007bff;
+}
+
+.card-header h4, .card-header h5 {
+    margin: 0;
+}
+
+code {
+    background-color: #f8f9fa;
+    padding: 2px 4px;
+    border-radius: 3px;
+    font-size: 87.5%;
+}
+
+.table th {
+    background-color: #f8f9fa;
+}
+
+.alert ul {
+    padding-left: 20px;
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    // 平滑滚动到锚点
+    $('.nav-link').on('click', function(e) {
+        e.preventDefault();
+        
+        const target = $(this).attr('href');
+        const targetSection = $(target);
+        
+        if (targetSection.length) {
+            // 更新活动状态
+            $('.nav-link').removeClass('active');
+            $(this).addClass('active');
+            
+            // 滚动到目标位置
+            $('html, body').animate({
+                scrollTop: targetSection.offset().top - 100
+            }, 500);
+        }
+    });
+    
+    // 滚动时更新导航状态
+    $(window).on('scroll', function() {
+        const scrollPos = $(window).scrollTop() + 150;
+        
+        $('.help-section').each(function() {
+            const sectionTop = $(this).offset().top;
+            const sectionBottom = sectionTop + $(this).outerHeight();
+            const sectionId = $(this).attr('id');
+            
+            if (scrollPos >= sectionTop && scrollPos < sectionBottom) {
+                $('.nav-link').removeClass('active');
+                $(`.nav-link[href="#${sectionId}"]`).addClass('active');
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

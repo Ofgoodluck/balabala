@@ -1,0 +1,677 @@
+{% extends "base.html" %}
+
+{% block title %}图书管理 - 分布式图书馆系统{% endblock %}
+{% block nav_library %}active{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <h2><i class="fas fa-books"></i> 图书管理系统</h2>
+            <p class="text-muted">跨校图书资源管理、借阅和归还功能</p>
+        </div>
+    </div>
+    
+    <!-- 功能选项卡 -->
+    <nav>
+        <div class="nav nav-tabs" id="nav-tab" role="tablist">
+            <button class="nav-link active" id="nav-search-tab" data-bs-toggle="tab" data-bs-target="#nav-search" type="button" role="tab">
+                <i class="fas fa-search"></i> 图书搜索
+            </button>
+            <button class="nav-link" id="nav-add-tab" data-bs-toggle="tab" data-bs-target="#nav-add" type="button" role="tab">
+                <i class="fas fa-plus"></i> 添加图书
+            </button>
+            <button class="nav-link" id="nav-borrow-tab" data-bs-toggle="tab" data-bs-target="#nav-borrow" type="button" role="tab">
+                <i class="fas fa-hand-holding"></i> 借阅管理
+            </button>
+            <button class="nav-link" id="nav-stats-tab" data-bs-toggle="tab" data-bs-target="#nav-stats" type="button" role="tab">
+                <i class="fas fa-chart-bar"></i> 统计分析
+            </button>
+        </div>
+    </nav>
+    
+    <div class="tab-content" id="nav-tabContent">
+        <!-- 图书搜索 -->
+        <div class="tab-pane fade show active" id="nav-search" role="tabpanel">
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h5><i class="fas fa-search"></i> 图书搜索</h5>
+                </div>
+                <div class="card-body">
+                    <form id="searchForm">
+                        <div class="row">
+                            <div class="col-md-8">
+                                <input type="text" class="form-control" id="searchTerm" placeholder="输入书名、作者或ISBN进行搜索">
+                            </div>
+                            <div class="col-md-2">
+                                <select class="form-select" id="searchType">
+                                    <option value="all">全部字段</option>
+                                    <option value="title">书名</option>
+                                    <option value="author">作者</option>
+                                    <option value="isbn">ISBN</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <button type="submit" class="btn btn-primary w-100">
+                                    <i class="fas fa-search"></i> 搜索
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                    
+                    <!-- 搜索结果 -->
+                    <div id="searchResults" class="mt-4" style="display: none;">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h6>搜索结果</h6>
+                            <span id="searchStats" class="badge bg-info"></span>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-striped" id="booksTable">
+                                <thead>
+                                    <tr>
+                                        <th>书名</th>
+                                        <th>作者</th>
+                                        <th>ISBN</th>
+                                        <th>图书馆</th>
+                                        <th>可借数量</th>
+                                        <th>位置</th>
+                                        <th>操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="booksTableBody">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 添加图书 -->
+        <div class="tab-pane fade" id="nav-add" role="tabpanel">
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h5><i class="fas fa-plus"></i> 添加新图书</h5>
+                </div>
+                <div class="card-body">
+                    <form id="addBookForm">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="bookTitle" class="form-label">书名 *</label>
+                                    <input type="text" class="form-control" id="bookTitle" required>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="bookAuthor" class="form-label">作者 *</label>
+                                    <input type="text" class="form-control" id="bookAuthor" required>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="bookISBN" class="form-label">ISBN *</label>
+                                    <input type="text" class="form-control" id="bookISBN" required 
+                                           pattern="[0-9-X]{10,17}" placeholder="978-7-111-54493-7">
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="bookPublisher" class="form-label">出版社</label>
+                                    <input type="text" class="form-control" id="bookPublisher">
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="bookYear" class="form-label">出版年份</label>
+                                    <input type="number" class="form-control" id="bookYear" min="1900" max="2024" value="2024">
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="bookCategory" class="form-label">分类</label>
+                                    <select class="form-select" id="bookCategory">
+                                        <option value="计算机科学">计算机科学</option>
+                                        <option value="文学">文学</option>
+                                        <option value="历史">历史</option>
+                                        <option value="哲学">哲学</option>
+                                        <option value="工程技术">工程技术</option>
+                                        <option value="经济管理">经济管理</option>
+                                        <option value="其他">其他</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="bookLibrary" class="form-label">所属图书馆 *</label>
+                                    <select class="form-select" id="bookLibrary" required>
+                                        <option value="1">四川大学图书馆</option>
+                                        <option value="2">电子科技大学图书馆</option>
+                                        <option value="3">西南交通大学图书馆</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="bookCopies" class="form-label">副本数量</label>
+                                    <input type="number" class="form-control" id="bookCopies" min="1" value="1">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-12">
+                                <button type="submit" class="btn btn-success">
+                                    <i class="fas fa-plus"></i> 添加图书
+                                </button>
+                                <button type="reset" class="btn btn-secondary ms-2">
+                                    <i class="fas fa-undo"></i> 重置
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 借阅管理 -->
+        <div class="tab-pane fade" id="nav-borrow" role="tabpanel">
+            <div class="row mt-3">
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5><i class="fas fa-hand-holding"></i> 借书</h5>
+                        </div>
+                        <div class="card-body">
+                            <form id="borrowForm">
+                                <div class="mb-3">
+                                    <label for="borrowUserId" class="form-label">用户ID</label>
+                                    <input type="number" class="form-control" id="borrowUserId" required>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="borrowBookId" class="form-label">图书ID</label>
+                                    <input type="number" class="form-control" id="borrowBookId" required>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="borrowLibraryId" class="form-label">图书馆</label>
+                                    <select class="form-select" id="borrowLibraryId" required>
+                                        <option value="1">四川大学图书馆</option>
+                                        <option value="2">电子科技大学图书馆</option>
+                                        <option value="3">西南交通大学图书馆</option>
+                                    </select>
+                                </div>
+                                
+                                <button type="submit" class="btn btn-primary w-100">
+                                    <i class="fas fa-check"></i> 确认借书
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5><i class="fas fa-undo"></i> 还书</h5>
+                        </div>
+                        <div class="card-body">
+                            <form id="returnForm">
+                                <div class="mb-3">
+                                    <label for="returnBorrowId" class="form-label">借阅记录ID</label>
+                                    <input type="number" class="form-control" id="returnBorrowId" required>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label class="form-label">归还说明</label>
+                                    <textarea class="form-control" rows="3" placeholder="可选的归还备注"></textarea>
+                                </div>
+                                
+                                <button type="submit" class="btn btn-success w-100">
+                                    <i class="fas fa-check"></i> 确认还书
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 借阅记录 -->
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h5><i class="fas fa-list"></i> 最近借阅记录</h5>
+                    <button class="btn btn-sm btn-outline-primary float-end" onclick="loadBorrowingRecords()">
+                        <i class="fas fa-sync"></i> 刷新
+                    </button>
+                </div>
+                <div class="card-body">
+                    <div id="borrowingRecords">
+                        <p class="text-muted">点击刷新按钮加载借阅记录</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 统计分析 -->
+        <div class="tab-pane fade" id="nav-stats" role="tabpanel">
+            <div class="row mt-3">
+                <div class="col-md-3">
+                    <div class="card text-center bg-primary text-white">
+                        <div class="card-body">
+                            <h4 id="totalBooks">0</h4>
+                            <p>图书总数</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-3">
+                    <div class="card text-center bg-success text-white">
+                        <div class="card-body">
+                            <h4 id="availableBooks">0</h4>
+                            <p>可借图书</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-3">
+                    <div class="card text-center bg-warning text-white">
+                        <div class="card-body">
+                            <h4 id="borrowedBooks">0</h4>
+                            <p>已借图书</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-3">
+                    <div class="card text-center bg-info text-white">
+                        <div class="card-body">
+                            <h4 id="totalUsers">0</h4>
+                            <p>注册用户</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row mt-4">
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5><i class="fas fa-chart-pie"></i> 分类分布</h5>
+                        </div>
+                        <div class="card-body">
+                            <canvas id="categoryChart" width="400" height="300"></canvas>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5><i class="fas fa-chart-bar"></i> 图书馆藏书分布</h5>
+                        </div>
+                        <div class="card-body">
+                            <canvas id="libraryChart" width="400" height="300"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 热门图书 -->
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h5><i class="fas fa-fire"></i> 热门图书 TOP 10</h5>
+                </div>
+                <div class="card-body">
+                    <div id="popularBooks">
+                        <p class="text-muted">加载中...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+$(document).ready(function() {
+    // 初始化图表
+    initCharts();
+    
+    // 表单事件绑定
+    $('#searchForm').on('submit', function(e) {
+        e.preventDefault();
+        searchBooks();
+    });
+    
+    $('#addBookForm').on('submit', function(e) {
+        e.preventDefault();
+        addBook();
+    });
+    
+    $('#borrowForm').on('submit', function(e) {
+        e.preventDefault();
+        borrowBook();
+    });
+    
+    // 页面切换时加载数据
+    $('button[data-bs-toggle="tab"]').on('shown.bs.tab', function(e) {
+        const target = $(e.target).attr('data-bs-target');
+        if (target === '#nav-stats') {
+            loadStatistics();
+        }
+    });
+});
+
+function searchBooks() {
+    const searchTerm = $('#searchTerm').val().trim();
+    const searchType = $('#searchType').val();
+    
+    if (!searchTerm) {
+        showAlert('请输入搜索关键词', 'warning');
+        return;
+    }
+    
+    const searchData = {
+        search_term: searchTerm,
+        search_type: searchType
+    };
+    
+    $.ajax({
+        url: '/api/books/search',
+        method: 'POST',
+        data: JSON.stringify(searchData),
+        contentType: 'application/json',
+        dataType: 'json',
+        success: function(response) {
+            if (response.success) {
+                displaySearchResults(response.results);
+                showAlert(`找到 ${response.results.length} 本图书`, 'success');
+            } else {
+                showAlert('搜索失败: ' + response.error, 'danger');
+            }
+        },
+        error: function(xhr, status, error) {
+            showAlert('搜索请求失败: ' + error, 'danger');
+        }
+    });
+}
+
+function displaySearchResults(books) {
+    const $resultsDiv = $('#searchResults');
+    const $tableBody = $('#booksTableBody');
+    const $statsSpan = $('#searchStats');
+    
+    $statsSpan.text(`共 ${books.length} 条结果`);
+    
+    if (books.length === 0) {
+        $tableBody.html('<tr><td colspan="7" class="text-center text-muted">未找到匹配的图书</td></tr>');
+    } else {
+        let html = '';
+        books.forEach(book => {
+            const libraryName = getLibraryName(book.library_id);
+            const availableClass = book.available_copies > 0 ? 'text-success' : 'text-danger';
+            
+            html += `
+                <tr>
+                    <td><strong>${book.title}</strong></td>
+                    <td>${book.author}</td>
+                    <td><code>${book.isbn}</code></td>
+                    <td>${libraryName}</td>
+                    <td class="${availableClass}">${book.available_copies}/${book.total_copies}</td>
+                    <td><small>${book.location_in_library || 'N/A'}</small></td>
+                    <td>
+                        <button class="btn btn-sm btn-primary" onclick="quickBorrow(${book.id}, ${book.library_id})" 
+                                ${book.available_copies <= 0 ? 'disabled' : ''}>
+                            <i class="fas fa-hand-holding"></i> 借阅
+                        </button>
+                    </td>
+                </tr>
+            `;
+        });
+        $tableBody.html(html);
+    }
+    
+    $resultsDiv.show();
+}
+
+function addBook() {
+    const bookData = {
+        title: $('#bookTitle').val(),
+        author: $('#bookAuthor').val(),
+        isbn: $('#bookISBN').val(),
+        publisher: $('#bookPublisher').val(),
+        publish_year: parseInt($('#bookYear').val()) || 2024,
+        category: $('#bookCategory').val(),
+        library_id: parseInt($('#bookLibrary').val()),
+        total_copies: parseInt($('#bookCopies').val()) || 1,
+        available_copies: parseInt($('#bookCopies').val()) || 1
+    };
+    
+    $.ajax({
+        url: '/api/books/add',
+        method: 'POST',
+        data: JSON.stringify(bookData),
+        contentType: 'application/json',
+        dataType: 'json',
+        success: function(response) {
+            if (response.success) {
+                showAlert('图书添加成功', 'success');
+                $('#addBookForm')[0].reset();
+            } else {
+                showAlert('添加失败: ' + response.error, 'danger');
+            }
+        },
+        error: function(xhr, status, error) {
+            showAlert('添加请求失败: ' + error, 'danger');
+        }
+    });
+}
+
+function borrowBook() {
+    const borrowData = {
+        user_id: parseInt($('#borrowUserId').val()),
+        book_id: parseInt($('#borrowBookId').val()),
+        library_id: parseInt($('#borrowLibraryId').val())
+    };
+    
+    $.ajax({
+        url: '/api/books/borrow',
+        method: 'POST',
+        data: JSON.stringify(borrowData),
+        contentType: 'application/json',
+        dataType: 'json',
+        success: function(response) {
+            if (response.success) {
+                showAlert('借书成功', 'success');
+                $('#borrowForm')[0].reset();
+            } else {
+                showAlert('借书失败: ' + response.error, 'danger');
+            }
+        },
+        error: function(xhr, status, error) {
+            showAlert('借书请求失败: ' + error, 'danger');
+        }
+    });
+}
+
+function quickBorrow(bookId, libraryId) {
+    $('#borrowBookId').val(bookId);
+    $('#borrowLibraryId').val(libraryId);
+    
+    // 切换到借阅管理标签
+    $('#nav-borrow-tab').tab('show');
+    
+    showAlert('已自动填充图书信息，请输入用户ID完成借阅', 'info');
+}
+
+function loadBorrowingRecords() {
+    // 模拟借阅记录数据
+    const mockRecords = [
+        {
+            id: 1,
+            user_name: '张三',
+            book_title: '计算机网络',
+            library_name: '四川大学图书馆',
+            borrow_date: '2024-09-01',
+            due_date: '2024-10-01',
+            status: '已借出'
+        },
+        {
+            id: 2,
+            user_name: '李四',
+            book_title: '数据结构',
+            library_name: '电子科技大学图书馆',
+            borrow_date: '2024-09-05',
+            due_date: '2024-10-05',
+            status: '已借出'
+        }
+    ];
+    
+    let html = `
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>用户</th>
+                        <th>图书</th>
+                        <th>图书馆</th>
+                        <th>借阅日期</th>
+                        <th>应还日期</th>
+                        <th>状态</th>
+                    </tr>
+                </thead>
+                <tbody>
+    `;
+    
+    mockRecords.forEach(record => {
+        html += `
+            <tr>
+                <td>${record.id}</td>
+                <td>${record.user_name}</td>
+                <td>${record.book_title}</td>
+                <td>${record.library_name}</td>
+                <td>${record.borrow_date}</td>
+                <td>${record.due_date}</td>
+                <td><span class="badge bg-warning">${record.status}</span></td>
+            </tr>
+        `;
+    });
+    
+    html += '</tbody></table></div>';
+    
+    $('#borrowingRecords').html(html);
+}
+
+function loadStatistics() {
+    // 模拟统计数据
+    $('#totalBooks').text('156');
+    $('#availableBooks').text('143');
+    $('#borrowedBooks').text('13');
+    $('#totalUsers').text('89');
+    
+    // 更新图表数据
+    updateCharts();
+    
+    // 加载热门图书
+    loadPopularBooks();
+}
+
+function loadPopularBooks() {
+    const popularBooks = [
+        { title: '计算机网络', author: '谢希仁', borrow_count: 15 },
+        { title: '数据结构', author: '严蔚敏', borrow_count: 12 },
+        { title: '算法导论', author: 'Thomas H.Cormen', borrow_count: 9 },
+        { title: '数据库系统概念', author: 'Abraham Silberschatz', borrow_count: 8 },
+        { title: '分布式系统原理与范型', author: 'Andrew S.Tanenbaum', borrow_count: 7 }
+    ];
+    
+    let html = '<ol class="list-group list-group-numbered">';
+    popularBooks.forEach(book => {
+        html += `
+            <li class="list-group-item d-flex justify-content-between align-items-start">
+                <div class="ms-2 me-auto">
+                    <div class="fw-bold">${book.title}</div>
+                    <small class="text-muted">${book.author}</small>
+                </div>
+                <span class="badge bg-primary rounded-pill">${book.borrow_count}</span>
+            </li>
+        `;
+    });
+    html += '</ol>';
+    
+    $('#popularBooks').html(html);
+}
+
+function initCharts() {
+    // 分类分布图表
+    const categoryCtx = document.getElementById('categoryChart').getContext('2d');
+    window.categoryChart = new Chart(categoryCtx, {
+        type: 'pie',
+        data: {
+            labels: ['计算机科学', '文学', '工程技术', '经济管理', '其他'],
+            datasets: [{
+                data: [45, 30, 35, 25, 21],
+                backgroundColor: [
+                    '#FF6384',
+                    '#36A2EB',
+                    '#FFCE56',
+                    '#4BC0C0',
+                    '#9966FF'
+                ]
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                }
+            }
+        }
+    });
+    
+    // 图书馆分布图表
+    const libraryCtx = document.getElementById('libraryChart').getContext('2d');
+    window.libraryChart = new Chart(libraryCtx, {
+        type: 'bar',
+        data: {
+            labels: ['四川大学', '电子科技大学', '西南交通大学'],
+            datasets: [{
+                label: '藏书数量',
+                data: [52, 48, 56],
+                backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56']
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+}
+
+function updateCharts() {
+    // 更新图表数据
+    if (window.categoryChart) {
+        window.categoryChart.data.datasets[0].data = [45, 30, 35, 25, 21];
+        window.categoryChart.update();
+    }
+    
+    if (window.libraryChart) {
+        window.libraryChart.data.datasets[0].data = [52, 48, 56];
+        window.libraryChart.update();
+    }
+}
+
+function getLibraryName(libraryId) {
+    const names = {
+        1: '四川大学图书馆',
+        2: '电子科技大学图书馆',
+        3: '西南交通大学图书馆'
+    };
+    return names[libraryId] || '未知图书馆';
+}
+</script>
+{% endblock %}

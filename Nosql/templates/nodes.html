@@ -1,0 +1,686 @@
+{% extends "base.html" %}
+
+{% block title %}节点监控 - 分布式图书馆系统{% endblock %}
+{% block nav_nodes %}active{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <h2><i class="fas fa-server"></i> 分布式节点监控</h2>
+            <p class="text-muted">实时监控各数据节点的状态、命令执行和性能表现</p>
+        </div>
+    </div>
+    
+    <!-- 节点概览 -->
+    <div class="row">
+        <div class="col-md-4" data-node="node1">
+            <div class="card border-primary">
+                <div class="card-header bg-primary text-white">
+                    <h5><i class="fas fa-database"></i> 四川大学图书馆 (Node 1)</h5>
+                    <span class="badge bg-light text-dark float-end">主节点</span>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-6">
+                            <h4 class="text-primary">0</h4>
+                            <small class="text-muted">命令数</small>
+                        </div>
+                        <div class="col-6">
+                            <h4 class="text-success">在线</h4>
+                            <small class="text-muted">状态</small>
+                        </div>
+                    </div>
+                    <hr>
+                    <div class="d-grid gap-2">
+                        <button class="btn btn-outline-primary btn-sm" onclick="showNodeDetails('node1')">
+                            <i class="fas fa-eye"></i> 查看详情
+                        </button>
+                        <button class="btn btn-outline-secondary btn-sm" onclick="showNodeCommands('node1')">
+                            <i class="fas fa-list"></i> 命令日志
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4" data-node="node2">
+            <div class="card border-success">
+                <div class="card-header bg-success text-white">
+                    <h5><i class="fas fa-database"></i> 电子科技大学图书馆 (Node 2)</h5>
+                    <span class="badge bg-light text-dark float-end">数据节点</span>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-6">
+                            <h4 class="text-primary">0</h4>
+                            <small class="text-muted">命令数</small>
+                        </div>
+                        <div class="col-6">
+                            <h4 class="text-success">在线</h4>
+                            <small class="text-muted">状态</small>
+                        </div>
+                    </div>
+                    <hr>
+                    <div class="d-grid gap-2">
+                        <button class="btn btn-outline-success btn-sm" onclick="showNodeDetails('node2')">
+                            <i class="fas fa-eye"></i> 查看详情
+                        </button>
+                        <button class="btn btn-outline-secondary btn-sm" onclick="showNodeCommands('node2')">
+                            <i class="fas fa-list"></i> 命令日志
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4" data-node="node3">
+            <div class="card border-warning">
+                <div class="card-header bg-warning text-white">
+                    <h5><i class="fas fa-database"></i> 西南交通大学图书馆 (Node 3)</h5>
+                    <span class="badge bg-light text-dark float-end">数据节点</span>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-6">
+                            <h4 class="text-primary">0</h4>
+                            <small class="text-muted">命令数</small>
+                        </div>
+                        <div class="col-6">
+                            <h4 class="text-success">在线</h4>
+                            <small class="text-muted">状态</small>
+                        </div>
+                    </div>
+                    <hr>
+                    <div class="d-grid gap-2">
+                        <button class="btn btn-outline-warning btn-sm" onclick="showNodeDetails('node3')">
+                            <i class="fas fa-eye"></i> 查看详情
+                        </button>
+                        <button class="btn btn-outline-secondary btn-sm" onclick="showNodeCommands('node3')">
+                            <i class="fas fa-list"></i> 命令日志
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 实时命令监控 -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-terminal"></i> 实时命令监控</h5>
+                    <div class="float-end">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="realTimeMonitor" checked>
+                            <label class="form-check-label" for="realTimeMonitor">实时更新</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <h6 class="text-primary">Node 1 - 四川大学</h6>
+                            <div id="node1-commands" class="commands-log">
+                                <div class="log-entry">
+                                    <span class="text-muted">[启动]</span> 节点初始化完成
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-4">
+                            <h6 class="text-success">Node 2 - 电子科技大学</h6>
+                            <div id="node2-commands" class="commands-log">
+                                <div class="log-entry">
+                                    <span class="text-muted">[启动]</span> 节点初始化完成
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-4">
+                            <h6 class="text-warning">Node 3 - 西南交通大学</h6>
+                            <div id="node3-commands" class="commands-log">
+                                <div class="log-entry">
+                                    <span class="text-muted">[启动]</span> 节点初始化完成
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 网络拓扑图 -->
+    <div class="row mt-4">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-project-diagram"></i> 网络拓扑结构</h5>
+                </div>
+                <div class="card-body">
+                    <div class="topology-container">
+                        <svg width="100%" height="300" id="topologyDiagram">
+                            <!-- 主控制节点 -->
+                            <g id="masterNode">
+                                <circle cx="400" cy="50" r="25" fill="#3498db" stroke="#2c3e50" stroke-width="2"/>
+                                <text x="400" y="55" text-anchor="middle" fill="white" font-size="12">主控</text>
+                                <text x="400" y="80" text-anchor="middle" font-size="11">Master</text>
+                            </g>
+                            
+                            <!-- 数据节点 -->
+                            <g id="node1">
+                                <circle cx="150" cy="200" r="30" fill="#e74c3c" stroke="#c0392b" stroke-width="2"/>
+                                <text x="150" y="190" text-anchor="middle" fill="white" font-size="10">Node 1</text>
+                                <text x="150" y="205" text-anchor="middle" fill="white" font-size="10">四川大学</text>
+                                <text x="150" y="235" text-anchor="middle" font-size="10">SCU</text>
+                            </g>
+                            
+                            <g id="node2">
+                                <circle cx="400" cy="200" r="30" fill="#27ae60" stroke="#229954" stroke-width="2"/>
+                                <text x="400" y="190" text-anchor="middle" fill="white" font-size="10">Node 2</text>
+                                <text x="400" y="205" text-anchor="middle" fill="white" font-size="10">电子科大</text>
+                                <text x="400" y="235" text-anchor="middle" font-size="10">UESTC</text>
+                            </g>
+                            
+                            <g id="node3">
+                                <circle cx="650" cy="200" r="30" fill="#f39c12" stroke="#e67e22" stroke-width="2"/>
+                                <text x="650" y="190" text-anchor="middle" fill="white" font-size="10">Node 3</text>
+                                <text x="650" y="205" text-anchor="middle" fill="white" font-size="10">西南交大</text>
+                                <text x="650" y="235" text-anchor="middle" font-size="10">SWJTU</text>
+                            </g>
+                            
+                            <!-- 连接线 -->
+                            <line x1="380" y1="70" x2="160" y2="180" stroke="#34495e" stroke-width="2"/>
+                            <line x1="400" y1="75" x2="400" y2="170" stroke="#34495e" stroke-width="2"/>
+                            <line x1="420" y1="70" x2="640" y2="180" stroke="#34495e" stroke-width="2"/>
+                            
+                            <!-- 节点间连接 -->
+                            <line x1="180" y1="200" x2="370" y2="200" stroke="#95a5a6" stroke-width="1" stroke-dasharray="5,5"/>
+                            <line x1="430" y1="200" x2="620" y2="200" stroke="#95a5a6" stroke-width="1" stroke-dasharray="5,5"/>
+                            <line x1="170" y1="220" x2="630" y2="220" stroke="#95a5a6" stroke-width="1" stroke-dasharray="5,5"/>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-chart-pie"></i> 负载分布</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="loadDistributionChart" width="300" height="200"></canvas>
+                </div>
+            </div>
+            
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h5><i class="fas fa-heartbeat"></i> 性能指标</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-2">
+                        <div class="d-flex justify-content-between">
+                            <span>Node 1 响应:</span>
+                            <span class="text-success">< 100ms</span>
+                        </div>
+                        <div class="progress" style="height: 5px;">
+                            <div class="progress-bar bg-success" style="width: 85%"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-2">
+                        <div class="d-flex justify-content-between">
+                            <span>Node 2 响应:</span>
+                            <span class="text-warning">120ms</span>
+                        </div>
+                        <div class="progress" style="height: 5px;">
+                            <div class="progress-bar bg-warning" style="width: 70%"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-2">
+                        <div class="d-flex justify-content-between">
+                            <span>Node 3 响应:</span>
+                            <span class="text-success">95ms</span>
+                        </div>
+                        <div class="progress" style="height: 5px;">
+                            <div class="progress-bar bg-success" style="width: 90%"></div>
+                        </div>
+                    </div>
+                    
+                    <hr>
+                    
+                    <div class="text-center">
+                        <small class="text-muted">平均响应时间: 105ms</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 节点详情模态框 -->
+<div class="modal fade" id="nodeDetailModal" tabindex="-1">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="nodeDetailTitle">节点详情</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="nodeDetailContent">
+                <!-- 内容将通过JavaScript填充 -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 命令日志模态框 -->
+<div class="modal fade" id="commandLogModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="commandLogTitle">命令日志</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="commandLogContent">
+                <!-- 内容将通过JavaScript填充 -->
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.commands-log {
+    height: 300px;
+    overflow-y: auto;
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 5px;
+    padding: 10px;
+}
+
+.log-entry {
+    font-family: 'Courier New', monospace;
+    font-size: 11px;
+    margin-bottom: 3px;
+    padding: 2px 5px;
+    border-radius: 2px;
+}
+
+.log-entry.success {
+    background-color: #d4edda;
+    border-left: 3px solid #27ae60;
+}
+
+.log-entry.error {
+    background-color: #f8d7da;
+    border-left: 3px solid #e74c3c;
+}
+
+.log-entry.warning {
+    background-color: #fff3cd;
+    border-left: 3px solid #f39c12;
+}
+
+.topology-container {
+    text-align: center;
+    background-color: #f8f9fa;
+    border-radius: 5px;
+    padding: 10px;
+}
+
+.node-card {
+    transition: all 0.3s ease;
+}
+
+.node-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.progress {
+    margin-top: 3px;
+}
+
+#topologyDiagram circle {
+    transition: all 0.3s ease;
+}
+
+#topologyDiagram circle:hover {
+    r: 35;
+    stroke-width: 3;
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+let realTimeMonitorEnabled = true;
+let monitorInterval;
+
+$(document).ready(function() {
+    // 初始化负载分布图表
+    initLoadDistributionChart();
+    
+    // 启动实时监控
+    startRealTimeMonitor();
+    
+    // 实时监控开关
+    $('#realTimeMonitor').change(function() {
+        realTimeMonitorEnabled = this.checked;
+        if (realTimeMonitorEnabled) {
+            startRealTimeMonitor();
+        } else {
+            stopRealTimeMonitor();
+        }
+    });
+    
+    // 初始加载节点状态
+    loadAllNodesStatus();
+});
+
+function startRealTimeMonitor() {
+    if (monitorInterval) clearInterval(monitorInterval);
+    
+    monitorInterval = setInterval(function() {
+        if (realTimeMonitorEnabled) {
+            updateAllNodesCommands();
+        }
+    }, 3000); // 每3秒更新
+}
+
+function stopRealTimeMonitor() {
+    if (monitorInterval) {
+        clearInterval(monitorInterval);
+        monitorInterval = null;
+    }
+}
+
+function loadAllNodesStatus() {
+    ['node1', 'node2', 'node3'].forEach(nodeId => {
+        loadNodeStatus(nodeId);
+    });
+}
+
+function loadNodeStatus(nodeId) {
+    $.ajax({
+        url: `/api/node/${nodeId}/status`,
+        method: 'GET',
+        dataType: 'json',
+        success: function(data) {
+            updateNodeCard(nodeId, data);
+        },
+        error: function(xhr, status, error) {
+            console.error(`Failed to load status for ${nodeId}:`, error);
+            markNodeOffline(nodeId);
+        }
+    });
+}
+
+function updateNodeCard(nodeId, data) {
+    const $nodeCard = $(`[data-node="${nodeId}"]`);
+    
+    // 更新命令数
+    $nodeCard.find('h4.text-primary').text(data.commands_count || 0);
+    
+    // 更新状态
+    const statusElement = $nodeCard.find('h4.text-success');
+    statusElement.text('在线').removeClass('text-danger').addClass('text-success');
+    
+    // 添加最后活动时间
+    if (data.last_activity) {
+        const lastActivity = new Date(data.last_activity).toLocaleTimeString();
+        if (!$nodeCard.find('.last-activity').length) {
+            $nodeCard.find('.card-body').append(`
+                <small class="text-muted last-activity">最后活动: ${lastActivity}</small>
+            `);
+        } else {
+            $nodeCard.find('.last-activity').text(`最后活动: ${lastActivity}`);
+        }
+    }
+}
+
+function markNodeOffline(nodeId) {
+    const $nodeCard = $(`[data-node="${nodeId}"]`);
+    $nodeCard.find('h4.text-success').text('离线').removeClass('text-success').addClass('text-danger');
+}
+
+function updateAllNodesCommands() {
+    ['node1', 'node2', 'node3'].forEach(nodeId => {
+        updateNodeCommands(nodeId);
+    });
+}
+
+function updateNodeCommands(nodeId) {
+    $.ajax({
+        url: `/api/node/${nodeId}/commands`,
+        method: 'GET',
+        data: { limit: 10 },
+        dataType: 'json',
+        success: function(commands) {
+            displayNodeCommands(nodeId, commands);
+        },
+        error: function(xhr, status, error) {
+            console.error(`Failed to load commands for ${nodeId}:`, error);
+        }
+    });
+}
+
+function displayNodeCommands(nodeId, commands) {
+    const $commandsLog = $(`#${nodeId}-commands`);
+    
+    if (commands.length === 0) {
+        $commandsLog.html('<div class="log-entry"><span class="text-muted">[等待]</span> 暂无命令</div>');
+        return;
+    }
+    
+    let html = '';
+    commands.slice(-10).forEach(cmd => {
+        const timestamp = new Date(cmd.timestamp).toLocaleTimeString();
+        const statusClass = getLogEntryClass(cmd.status);
+        
+        html += `
+            <div class="log-entry ${statusClass}">
+                <span class="text-muted">[${timestamp}]</span>
+                <span class="badge bg-secondary">${cmd.type}</span>
+                ${cmd.command.substring(0, 50)}${cmd.command.length > 50 ? '...' : ''}
+                <span class="float-end">${createStatusBadge(cmd.status)}</span>
+            </div>
+        `;
+    });
+    
+    $commandsLog.html(html);
+    
+    // 自动滚动到底部
+    $commandsLog.scrollTop($commandsLog[0].scrollHeight);
+}
+
+function getLogEntryClass(status) {
+    switch (status) {
+        case 'completed':
+        case 'sent':
+            return 'success';
+        case 'failed':
+            return 'error';
+        case 'executing':
+            return 'warning';
+        default:
+            return '';
+    }
+}
+
+function showNodeDetails(nodeId) {
+    $.ajax({
+        url: `/api/node/${nodeId}/status`,
+        method: 'GET',
+        dataType: 'json',
+        success: function(data) {
+            displayNodeDetails(data);
+        },
+        error: function(xhr, status, error) {
+            showAlert('加载节点详情失败: ' + error, 'danger');
+        }
+    });
+}
+
+function displayNodeDetails(nodeData) {
+    const detailHtml = `
+        <div class="row">
+            <div class="col-md-6">
+                <h6>基本信息</h6>
+                <table class="table table-sm">
+                    <tr><td>节点ID:</td><td><code>${nodeData.id}</code></td></tr>
+                    <tr><td>名称:</td><td>${nodeData.name}</td></tr>
+                    <tr><td>数据库:</td><td><code>${nodeData.database}</code></td></tr>
+                    <tr><td>坐标:</td><td>${nodeData.location.lat.toFixed(4)}, ${nodeData.location.lng.toFixed(4)}</td></tr>
+                </table>
+            </div>
+            <div class="col-md-6">
+                <h6>运行状态</h6>
+                <table class="table table-sm">
+                    <tr><td>命令总数:</td><td><span class="badge bg-primary">${nodeData.commands_count}</span></td></tr>
+                    <tr><td>最后活动:</td><td>${nodeData.last_activity || '无记录'}</td></tr>
+                    <tr><td>状态:</td><td><span class="badge bg-success">在线</span></td></tr>
+                    <tr><td>响应时间:</td><td><span class="text-success">< 100ms</span></td></tr>
+                </table>
+            </div>
+        </div>
+        
+        <div class="row mt-3">
+            <div class="col-12">
+                <h6>最近命令 (最新10条)</h6>
+                <div class="table-responsive">
+                    <table class="table table-striped table-sm">
+                        <thead>
+                            <tr>
+                                <th>时间</th>
+                                <th>类型</th>
+                                <th>命令</th>
+                                <th>状态</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${nodeData.recent_commands.map(cmd => `
+                                <tr>
+                                    <td><small>${cmd.timestamp}</small></td>
+                                    <td><span class="badge bg-secondary">${cmd.type}</span></td>
+                                    <td><code>${cmd.command.substring(0, 60)}${cmd.command.length > 60 ? '...' : ''}</code></td>
+                                    <td>${createStatusBadge(cmd.status)}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    $('#nodeDetailTitle').text(`${nodeData.name} - 详细信息`);
+    $('#nodeDetailContent').html(detailHtml);
+    $('#nodeDetailModal').modal('show');
+}
+
+function showNodeCommands(nodeId) {
+    $.ajax({
+        url: `/api/node/${nodeId}/commands`,
+        method: 'GET',
+        data: { limit: 100 },
+        dataType: 'json',
+        success: function(commands) {
+            displayCommandLog(nodeId, commands);
+        },
+        error: function(xhr, status, error) {
+            showAlert('加载命令日志失败: ' + error, 'danger');
+        }
+    });
+}
+
+function displayCommandLog(nodeId, commands) {
+    const nodeNames = {
+        'node1': '四川大学图书馆',
+        'node2': '电子科技大学图书馆',
+        'node3': '西南交通大学图书馆'
+    };
+    
+    let logHtml = '';
+    
+    if (commands.length === 0) {
+        logHtml = '<p class="text-muted">暂无命令记录</p>';
+    } else {
+        logHtml = `
+            <div class="table-responsive">
+                <table class="table table-striped table-sm">
+                    <thead>
+                        <tr>
+                            <th>时间戳</th>
+                            <th>类型</th>
+                            <th>命令内容</th>
+                            <th>状态</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${commands.map(cmd => `
+                            <tr>
+                                <td><small>${cmd.timestamp}</small></td>
+                                <td><span class="badge bg-secondary">${cmd.type}</span></td>
+                                <td><code style="font-size: 11px;">${cmd.command}</code></td>
+                                <td>${createStatusBadge(cmd.status)}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            </div>
+        `;
+    }
+    
+    $('#commandLogTitle').text(`${nodeNames[nodeId]} - 命令日志`);
+    $('#commandLogContent').html(logHtml);
+    $('#commandLogModal').modal('show');
+}
+
+function initLoadDistributionChart() {
+    const ctx = document.getElementById('loadDistributionChart').getContext('2d');
+    
+    new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Node 1', 'Node 2', 'Node 3'],
+            datasets: [{
+                label: '命令负载',
+                data: [0, 0, 0], // 初始数据，将通过实时更新
+                backgroundColor: [
+                    'rgba(231, 76, 60, 0.8)',
+                    'rgba(39, 174, 96, 0.8)',
+                    'rgba(243, 156, 18, 0.8)'
+                ],
+                borderColor: [
+                    'rgba(231, 76, 60, 1)',
+                    'rgba(39, 174, 96, 1)',
+                    'rgba(243, 156, 18, 1)'
+                ],
+                borderWidth: 2
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                }
+            }
+        }
+    });
+}
+
+// 清理定时器
+$(window).on('beforeunload', function() {
+    stopRealTimeMonitor();
+});
+</script>
+{% endblock %}

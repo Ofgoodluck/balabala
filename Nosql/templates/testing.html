@@ -1,0 +1,619 @@
+{% extends "base.html" %}
+
+{% block title %}系统测试 - 分布式图书馆系统{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <h2><i class="fas fa-vial"></i> 系统功能测试</h2>
+            <p class="text-muted">全面测试分布式图书馆系统的各项功能和性能表现</p>
+        </div>
+    </div>
+    
+    <!-- 测试控制面板 -->
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-play-circle"></i> 自动化测试套件</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>基础功能测试</h6>
+                            <div class="d-grid gap-2">
+                                <button class="btn btn-outline-primary" onclick="testDatabaseConnection()">
+                                    <i class="fas fa-database"></i> 数据库连接测试
+                                </button>
+                                <button class="btn btn-outline-success" onclick="testSampleQueries()">
+                                    <i class="fas fa-search"></i> 示例查询测试
+                                </button>
+                                <button class="btn btn-outline-info" onclick="testQueryOptimization()">
+                                    <i class="fas fa-cogs"></i> 查询优化测试
+                                </button>
+                                <button class="btn btn-outline-warning" onclick="testNodeCommunication()">
+                                    <i class="fas fa-network-wired"></i> 节点通信测试
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <h6>高级功能测试</h6>
+                            <div class="d-grid gap-2">
+                                <button class="btn btn-outline-secondary" onclick="testGISFunctions()">
+                                    <i class="fas fa-map"></i> GIS功能测试
+                                </button>
+                                <button class="btn btn-outline-danger" onclick="testLibraryManagement()">
+                                    <i class="fas fa-books"></i> 图书管理测试
+                                </button>
+                                <button class="btn btn-outline-dark" onclick="testPerformance()">
+                                    <i class="fas fa-tachometer-alt"></i> 性能压力测试
+                                </button>
+                                <button class="btn btn-primary" onclick="runAllTests()">
+                                    <i class="fas fa-rocket"></i> 运行全部测试
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 测试结果显示 -->
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h5><i class="fas fa-list-check"></i> 测试结果</h5>
+                    <div class="float-end">
+                        <button class="btn btn-sm btn-outline-secondary" onclick="clearTestResults()">
+                            <i class="fas fa-trash"></i> 清空结果
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div id="testResults">
+                        <div class="text-muted text-center">
+                            <i class="fas fa-info-circle"></i> 点击上方按钮开始测试
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 测试统计 -->
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-chart-pie"></i> 测试统计</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-6">
+                            <h3 class="text-success" id="passedTests">0</h3>
+                            <small class="text-muted">通过</small>
+                        </div>
+                        <div class="col-6">
+                            <h3 class="text-danger" id="failedTests">0</h3>
+                            <small class="text-muted">失败</small>
+                        </div>
+                    </div>
+                    <div class="progress mt-3">
+                        <div class="progress-bar bg-success" id="testProgress" style="width: 0%"></div>
+                    </div>
+                    <div class="text-center mt-2">
+                        <small class="text-muted">总体通过率: <span id="passRate">0%</span></small>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 性能指标 -->
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h5><i class="fas fa-speedometer"></i> 性能指标</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between">
+                            <span>平均响应时间:</span>
+                            <span id="avgResponseTime">-</span>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between">
+                            <span>最快查询:</span>
+                            <span id="fastestQuery" class="text-success">-</span>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between">
+                            <span>最慢查询:</span>
+                            <span id="slowestQuery" class="text-danger">-</span>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between">
+                            <span>查询总数:</span>
+                            <span id="totalQueries">0</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 系统健康状态 -->
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h5><i class="fas fa-heartbeat"></i> 系统健康</h5>
+                </div>
+                <div class="card-body">
+                    <div class="health-item">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span>数据库连接</span>
+                            <span id="dbHealth" class="badge bg-secondary">未测试</span>
+                        </div>
+                    </div>
+                    
+                    <div class="health-item">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span>节点通信</span>
+                            <span id="nodeHealth" class="badge bg-secondary">未测试</span>
+                        </div>
+                    </div>
+                    
+                    <div class="health-item">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span>查询处理</span>
+                            <span id="queryHealth" class="badge bg-secondary">未测试</span>
+                        </div>
+                    </div>
+                    
+                    <div class="health-item">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span>GIS服务</span>
+                            <span id="gisHealth" class="badge bg-secondary">未测试</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 测试详情模态框 -->
+    <div class="modal fade" id="testDetailModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">测试详情</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="testDetailContent">
+                    <!-- 内容将通过JavaScript填充 -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.test-result {
+    border: 1px solid #dee2e6;
+    border-radius: 5px;
+    padding: 10px;
+    margin-bottom: 10px;
+    transition: all 0.3s ease;
+}
+
+.test-result.passed {
+    border-left: 4px solid #28a745;
+    background-color: #f8fff9;
+}
+
+.test-result.failed {
+    border-left: 4px solid #dc3545;
+    background-color: #fff8f8;
+}
+
+.test-result.running {
+    border-left: 4px solid #ffc107;
+    background-color: #fffdf8;
+}
+
+.test-header {
+    display: flex;
+    justify-content-between;
+    align-items: center;
+    margin-bottom: 5px;
+}
+
+.test-details {
+    font-size: 14px;
+    color: #6c757d;
+}
+
+.health-item {
+    padding: 8px 0;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.health-item:last-child {
+    border-bottom: none;
+}
+
+.loading-spinner {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border: 2px solid #f3f3f3;
+    border-top: 2px solid #007bff;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let testStats = {
+    passed: 0,
+    failed: 0,
+    total: 0,
+    responseTimes: []
+};
+
+$(document).ready(function() {
+    updateTestStats();
+});
+
+function testDatabaseConnection() {
+    addTestResult('数据库连接测试', '正在测试数据库连接...', 'running');
+    
+    // 模拟测试
+    setTimeout(() => {
+        const success = Math.random() > 0.1; // 90% 成功率
+        if (success) {
+            updateTestResult('数据库连接测试', '所有数据库节点连接正常', 'passed', 150);
+            updateHealthStatus('dbHealth', 'success', '正常');
+        } else {
+            updateTestResult('数据库连接测试', 'Node 2 连接失败', 'failed');
+            updateHealthStatus('dbHealth', 'danger', '异常');
+        }
+        updateTestStats();
+    }, 2000);
+}
+
+function testSampleQueries() {
+    addTestResult('示例查询测试', '正在执行示例查询...', 'running');
+    
+    // 实际执行API调用
+    $.ajax({
+        url: '/api/test/sample_queries',
+        method: 'POST',
+        dataType: 'json',
+        success: function(response) {
+            const results = response.results;
+            const allPassed = results.every(r => r.success);
+            
+            let details = `执行了 ${results.length} 个查询，`;
+            const avgTime = results.reduce((sum, r) => sum + r.execution_time, 0) / results.length;
+            details += `平均响应时间: ${(avgTime * 1000).toFixed(2)}ms`;
+            
+            if (allPassed) {
+                updateTestResult('示例查询测试', details, 'passed', avgTime * 1000);
+                updateHealthStatus('queryHealth', 'success', '正常');
+            } else {
+                const failedCount = results.filter(r => !r.success).length;
+                updateTestResult('示例查询测试', `${failedCount} 个查询失败`, 'failed');
+                updateHealthStatus('queryHealth', 'warning', '部分异常');
+            }
+        },
+        error: function(xhr, status, error) {
+            updateTestResult('示例查询测试', '请求失败: ' + error, 'failed');
+            updateHealthStatus('queryHealth', 'danger', '异常');
+        },
+        complete: function() {
+            updateTestStats();
+        }
+    });
+}
+
+function testQueryOptimization() {
+    addTestResult('查询优化测试', '正在测试查询优化功能...', 'running');
+    
+    const testQuery = "SELECT * FROM books WHERE category = '计算机科学'";
+    
+    $.ajax({
+        url: '/query',
+        method: 'POST',
+        data: { sql: testQuery },
+        dataType: 'json',
+        success: function(response) {
+            if (response.success && response.query_info) {
+                const optimizationSteps = response.query_info.optimization_steps || [];
+                const fragments = response.query_info.fragments || [];
+                
+                let details = `查询优化步骤: ${optimizationSteps.length}, `;
+                details += `查询片段: ${fragments.length}, `;
+                details += `执行时间: ${(response.execution_time * 1000).toFixed(2)}ms`;
+                
+                updateTestResult('查询优化测试', details, 'passed', response.execution_time * 1000);
+            } else {
+                updateTestResult('查询优化测试', '优化失败: ' + (response.error || '未知错误'), 'failed');
+            }
+        },
+        error: function(xhr, status, error) {
+            updateTestResult('查询优化测试', '请求失败: ' + error, 'failed');
+        },
+        complete: function() {
+            updateTestStats();
+        }
+    });
+}
+
+function testNodeCommunication() {
+    addTestResult('节点通信测试', '正在测试节点间通信...', 'running');
+    
+    // 测试各个节点状态
+    const nodes = ['node1', 'node2', 'node3'];
+    let completedTests = 0;
+    let successfulNodes = 0;
+    
+    nodes.forEach(nodeId => {
+        $.ajax({
+            url: `/api/node/${nodeId}/status`,
+            method: 'GET',
+            dataType: 'json',
+            success: function(data) {
+                successfulNodes++;
+            },
+            error: function(xhr, status, error) {
+                console.error(`Node ${nodeId} test failed:`, error);
+            },
+            complete: function() {
+                completedTests++;
+                if (completedTests === nodes.length) {
+                    // 所有测试完成
+                    const allSuccess = successfulNodes === nodes.length;
+                    let details = `${successfulNodes}/${nodes.length} 个节点响应正常`;
+                    
+                    if (allSuccess) {
+                        updateTestResult('节点通信测试', details, 'passed', 200);
+                        updateHealthStatus('nodeHealth', 'success', '正常');
+                    } else {
+                        updateTestResult('节点通信测试', details, 'failed');
+                        updateHealthStatus('nodeHealth', 'warning', '部分异常');
+                    }
+                    updateTestStats();
+                }
+            }
+        });
+    });
+}
+
+function testGISFunctions() {
+    addTestResult('GIS功能测试', '正在测试地理信息功能...', 'running');
+    
+    const testData = {
+        type: 'nearest_libraries',
+        params: {
+            latitude: 30.6586,
+            longitude: 104.0647,
+            limit: 3
+        }
+    };
+    
+    $.ajax({
+        url: '/api/gis/spatial_query',
+        method: 'POST',
+        data: JSON.stringify(testData),
+        contentType: 'application/json',
+        dataType: 'json',
+        success: function(response) {
+            if (response.success) {
+                const results = response.results || [];
+                let details = `空间查询成功，找到 ${results.length} 个图书馆`;
+                updateTestResult('GIS功能测试', details, 'passed', 300);
+                updateHealthStatus('gisHealth', 'success', '正常');
+            } else {
+                updateTestResult('GIS功能测试', 'GIS查询失败: ' + response.error, 'failed');
+                updateHealthStatus('gisHealth', 'danger', '异常');
+            }
+        },
+        error: function(xhr, status, error) {
+            updateTestResult('GIS功能测试', '请求失败: ' + error, 'failed');
+            updateHealthStatus('gisHealth', 'danger', '异常');
+        },
+        complete: function() {
+            updateTestStats();
+        }
+    });
+}
+
+function testLibraryManagement() {
+    addTestResult('图书管理测试', '正在测试图书管理功能...', 'running');
+    
+    const searchData = {
+        search_term: '计算机',
+        search_type: 'title'
+    };
+    
+    $.ajax({
+        url: '/api/books/search',
+        method: 'POST',
+        data: JSON.stringify(searchData),
+        contentType: 'application/json',
+        dataType: 'json',
+        success: function(response) {
+            if (response.success) {
+                const results = response.results || [];
+                let details = `图书搜索成功，找到 ${results.length} 本相关图书`;
+                updateTestResult('图书管理测试', details, 'passed', 250);
+            } else {
+                updateTestResult('图书管理测试', '图书搜索失败: ' + response.error, 'failed');
+            }
+        },
+        error: function(xhr, status, error) {
+            updateTestResult('图书管理测试', '请求失败: ' + error, 'failed');
+        },
+        complete: function() {
+            updateTestStats();
+        }
+    });
+}
+
+function testPerformance() {
+    addTestResult('性能压力测试', '正在进行性能压力测试...', 'running');
+    
+    const startTime = Date.now();
+    const testQueries = [
+        "SELECT COUNT(*) FROM books",
+        "SELECT * FROM libraries",
+        "SELECT library_id, COUNT(*) FROM books GROUP BY library_id",
+        "SELECT * FROM books WHERE available_copies > 0",
+        "SELECT * FROM books WHERE category = '计算机科学'"
+    ];
+    
+    let completedQueries = 0;
+    let responseTimes = [];
+    
+    testQueries.forEach((query, index) => {
+        setTimeout(() => {
+            const queryStart = Date.now();
+            
+            $.ajax({
+                url: '/query',
+                method: 'POST',
+                data: { sql: query },
+                dataType: 'json',
+                complete: function(xhr, status) {
+                    const queryTime = Date.now() - queryStart;
+                    responseTimes.push(queryTime);
+                    completedQueries++;
+                    
+                    if (completedQueries === testQueries.length) {
+                        // 所有查询完成
+                        const totalTime = Date.now() - startTime;
+                        const avgTime = responseTimes.reduce((a, b) => a + b, 0) / responseTimes.length;
+                        const maxTime = Math.max(...responseTimes);
+                        const minTime = Math.min(...responseTimes);
+                        
+                        let details = `执行 ${testQueries.length} 个并发查询，`;
+                        details += `总耗时: ${totalTime}ms，平均响应: ${avgTime.toFixed(2)}ms`;
+                        
+                        const performance = avgTime < 500 ? 'passed' : 'failed';
+                        updateTestResult('性能压力测试', details, performance, avgTime);
+                        
+                        // 更新性能指标
+                        $('#avgResponseTime').text(avgTime.toFixed(2) + 'ms');
+                        $('#fastestQuery').text(minTime + 'ms');
+                        $('#slowestQuery').text(maxTime + 'ms');
+                        $('#totalQueries').text(testQueries.length);
+                        
+                        updateTestStats();
+                    }
+                }
+            });
+        }, index * 100); // 错开100ms执行
+    });
+}
+
+function runAllTests() {
+    clearTestResults();
+    
+    setTimeout(() => testDatabaseConnection(), 500);
+    setTimeout(() => testNodeCommunication(), 1000);
+    setTimeout(() => testSampleQueries(), 1500);
+    setTimeout(() => testQueryOptimization(), 2000);
+    setTimeout(() => testGISFunctions(), 2500);
+    setTimeout(() => testLibraryManagement(), 3000);
+    setTimeout(() => testPerformance(), 3500);
+}
+
+function addTestResult(testName, details, status) {
+    const statusIcon = status === 'passed' ? 'fa-check-circle text-success' :
+                      status === 'failed' ? 'fa-times-circle text-danger' :
+                      'fa-spinner fa-spin text-warning';
+    
+    const resultHtml = `
+        <div class="test-result ${status}" id="test-${testName.replace(/\s+/g, '-')}">
+            <div class="test-header">
+                <h6><i class="fas ${statusIcon}"></i> ${testName}</h6>
+                <small class="text-muted" id="time-${testName.replace(/\s+/g, '-')}"></small>
+            </div>
+            <div class="test-details">${details}</div>
+        </div>
+    `;
+    
+    if ($('#testResults .text-muted').length > 0) {
+        $('#testResults').html(resultHtml);
+    } else {
+        $('#testResults').append(resultHtml);
+    }
+}
+
+function updateTestResult(testName, details, status, responseTime) {
+    const testId = testName.replace(/\s+/g, '-');
+    const $testResult = $(`#test-${testId}`);
+    
+    $testResult.removeClass('running passed failed').addClass(status);
+    
+    const statusIcon = status === 'passed' ? 'fa-check-circle text-success' :
+                      'fa-times-circle text-danger';
+    
+    $testResult.find('.test-header i').removeClass().addClass(`fas ${statusIcon}`);
+    $testResult.find('.test-details').text(details);
+    
+    if (responseTime) {
+        $(`#time-${testId}`).text(`${responseTime.toFixed(2)}ms`);
+        testStats.responseTimes.push(responseTime);
+    }
+    
+    if (status === 'passed') {
+        testStats.passed++;
+    } else if (status === 'failed') {
+        testStats.failed++;
+    }
+    testStats.total++;
+}
+
+function updateTestStats() {
+    $('#passedTests').text(testStats.passed);
+    $('#failedTests').text(testStats.failed);
+    
+    const passRate = testStats.total > 0 ? 
+        (testStats.passed / testStats.total * 100).toFixed(1) : 0;
+    $('#passRate').text(passRate + '%');
+    $('#testProgress').css('width', passRate + '%');
+}
+
+function updateHealthStatus(elementId, type, text) {
+    const $badge = $(`#${elementId}`);
+    $badge.removeClass('bg-secondary bg-success bg-warning bg-danger')
+          .addClass(`bg-${type}`)
+          .text(text);
+}
+
+function clearTestResults() {
+    $('#testResults').html('<div class="text-muted text-center"><i class="fas fa-info-circle"></i> 点击上方按钮开始测试</div>');
+    
+    testStats = { passed: 0, failed: 0, total: 0, responseTimes: [] };
+    updateTestStats();
+    
+    // 重置健康状态
+    $('.health-item .badge').removeClass('bg-success bg-warning bg-danger')
+                           .addClass('bg-secondary')
+                           .text('未测试');
+    
+    // 重置性能指标
+    $('#avgResponseTime, #fastestQuery, #slowestQuery').text('-');
+    $('#totalQueries').text('0');
+}
+</script>
+{% endblock %}

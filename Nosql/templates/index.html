@@ -1,0 +1,239 @@
+{% extends "base.html" %}
+
+{% block title %}主页 - 分布式图书馆系统{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- 系统欢迎信息 -->
+    <div class="row">
+        <div class="col-12">
+            <div class="jumbotron bg-primary text-white p-5 rounded">
+                <h1 class="display-4">
+                    <i class="fas fa-book-open"></i> 欢迎使用分布式图书馆系统
+                </h1>
+                <p class="lead">
+                    基于GIS的成都高校图书馆联合管理平台，实现跨校图书资源共享与统一检索。
+                </p>
+                <hr class="my-4" style="border-color: rgba(255,255,255,0.3);">
+                <p>
+                    系统采用分布式架构，支持查询分解优化，提供实时监控和地理信息可视化功能。
+                </p>
+                <a class="btn btn-light btn-lg" href="/dashboard" role="button">
+                    <i class="fas fa-chart-line"></i> 查看系统监控
+                </a>
+                <a class="btn btn-outline-light btn-lg ms-2" href="/gis" role="button">
+                    <i class="fas fa-map"></i> 地理信息
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 功能模块卡片 -->
+    <div class="row mt-4">
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <div class="mb-3">
+                        <i class="fas fa-search fa-3x text-primary"></i>
+                    </div>
+                    <h5 class="card-title">分布式查询</h5>
+                    <p class="card-text">
+                        支持跨节点SQL查询，自动分解优化查询语句，透明化处理分布式数据访问。
+                    </p>
+                    <a href="/query" class="btn btn-primary">
+                        <i class="fas fa-arrow-right"></i> 开始查询
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <div class="mb-3">
+                        <i class="fas fa-server fa-3x text-success"></i>
+                    </div>
+                    <h5 class="card-title">节点监控</h5>
+                    <p class="card-text">
+                        实时监控各分布式节点状态，查看命令执行日志和性能统计信息。
+                    </p>
+                    <a href="/nodes" class="btn btn-success">
+                        <i class="fas fa-arrow-right"></i> 查看节点
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <div class="mb-3">
+                        <i class="fas fa-map-marker-alt fa-3x text-info"></i>
+                    </div>
+                    <h5 class="card-title">GIS地图</h5>
+                    <p class="card-text">
+                        基于地理位置的图书馆可视化，支持空间查询和路径规划功能。
+                    </p>
+                    <a href="/gis" class="btn btn-info">
+                        <i class="fas fa-arrow-right"></i> 查看地图
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 系统架构说明 -->
+    <div class="row mt-5">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-sitemap"></i> 系统架构</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <h6>分布式节点配置</h6>
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="card border-primary">
+                                        <div class="card-body text-center">
+                                            <h6 class="text-primary">四川大学图书馆</h6>
+                                            <p class="small text-muted">节点1 - 主要存储文学、历史等人文类图书</p>
+                                            <span class="badge bg-primary">Node 1</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="card border-success">
+                                        <div class="card-body text-center">
+                                            <h6 class="text-success">电子科技大学图书馆</h6>
+                                            <p class="small text-muted">节点2 - 主要存储计算机、电子类图书</p>
+                                            <span class="badge bg-success">Node 2</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="card border-warning">
+                                        <div class="card-body text-center">
+                                            <h6 class="text-warning">西南交通大学图书馆</h6>
+                                            <p class="small text-muted">节点3 - 主要存储交通、工程类图书</p>
+                                            <span class="badge bg-warning">Node 3</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-4">
+                            <h6>核心特性</h6>
+                            <ul class="list-unstyled">
+                                <li><i class="fas fa-check text-success"></i> 数据分片透明化</li>
+                                <li><i class="fas fa-check text-success"></i> 查询自动分解</li>
+                                <li><i class="fas fa-check text-success"></i> 执行过程可视化</li>
+                                <li><i class="fas fa-check text-success"></i> 地理信息集成</li>
+                                <li><i class="fas fa-check text-success"></i> 跨校资源共享</li>
+                                <li><i class="fas fa-check text-success"></i> 实时监控报告</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 快速开始指南 -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-rocket"></i> 快速开始</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>基本操作</h6>
+                            <ol>
+                                <li>访问 <a href="/query">SQL查询</a> 页面执行分布式查询</li>
+                                <li>查看 <a href="/optimization">查询优化</a> 过程和执行计划</li>
+                                <li>监控 <a href="/nodes">节点状态</a> 和命令执行日志</li>
+                                <li>使用 <a href="/gis">地理信息</a> 系统查看图书馆分布</li>
+                            </ol>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <h6>示例查询</h6>
+                            <div class="bg-light p-3 rounded">
+                                <code>
+                                    -- 查询所有计算机类图书<br>
+                                    SELECT * FROM books WHERE category = '计算机科学';<br><br>
+                                    
+                                    -- 查看图书馆信息<br>
+                                    SELECT name, address FROM libraries;<br><br>
+                                    
+                                    -- 统计各馆图书数量<br>
+                                    SELECT library_id, COUNT(*) FROM books GROUP BY library_id;
+                                </code>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 系统状态概览 -->
+    <div class="row mt-4">
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h2 class="text-primary">3</h2>
+                    <p class="text-muted">分布式节点</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h2 class="text-success">{{ master_config.port }}</h2>
+                    <p class="text-muted">服务端口</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h2 class="text-warning">实时</h2>
+                    <p class="text-muted">数据同步</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h2 class="text-info">GIS</h2>
+                    <p class="text-muted">地理集成</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    // 页面加载动画
+    $('.card').hide().fadeIn(800);
+    
+    // 添加悬停效果
+    $('.card').hover(
+        function() {
+            $(this).addClass('shadow-lg').css('transform', 'translateY(-5px)');
+        },
+        function() {
+            $(this).removeClass('shadow-lg').css('transform', 'translateY(0)');
+        }
+    );
+});
+</script>
+{% endblock %}
