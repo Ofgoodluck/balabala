@@ -220,7 +220,36 @@ class DistributedDatabaseManager:
     
     def get_performance_statistics(self) -> Dict[str, Any]:
         """获取性能统计"""
-        return self.performance_stats.copy()
+        stats = self.performance_stats.copy()
+        
+        # 确保所有值都是有效数字，避免NaN
+        total_queries = stats.get('total_queries', 0)
+        successful_queries = stats.get('successful_queries', 0)
+        failed_queries = stats.get('failed_queries', 0)
+        avg_response_time = stats.get('average_response_time', 0.0)
+        
+        # 计算成功率
+        if total_queries > 0:
+            success_rate = round((successful_queries / total_queries) * 100, 2)
+            error_rate = round((failed_queries / total_queries) * 100, 2)
+        else:
+            success_rate = 100.0
+            error_rate = 0.0
+        
+        # 转换响应时间为毫秒
+        avg_response_time_ms = round(avg_response_time * 1000, 2) if avg_response_time else 0.0
+        
+        return {
+            'total_queries': total_queries,
+            'successful_queries': successful_queries,
+            'failed_queries': failed_queries,
+            'success_rate': success_rate,
+            'error_rate': error_rate,
+            'average_response_time': avg_response_time_ms,
+            'average_execution_time': avg_response_time_ms,
+            'cache_hits': 0,  # 非Docker版本暂无缓存统计
+            'cache_hit_rate': 0.0
+        }
     
     def get_recent_transactions(self, limit: int = 50) -> List[Dict[str, Any]]:
         """获取最近的事务日志"""
@@ -349,3 +378,5 @@ class DistributedDatabaseManager:
                     return node_id
         
         return 'node1'  # 默认节点
+
+

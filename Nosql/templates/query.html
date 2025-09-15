@@ -352,7 +352,15 @@ $(document).ready(function() {
     
     function displayExecutionInfo(response) {
         $('#executionTime').text(formatExecutionTime(response.execution_time));
-        $('#nodesInvolved').text(response.nodes_involved || 'N/A');
+        
+        // 显示参与查询的节点信息
+        if (response.nodes_queried && response.nodes_queried.length > 0) {
+            $('#nodesInvolved').text(response.nodes_queried.join(', '));
+        } else if (response.nodes_involved) {
+            $('#nodesInvolved').text(response.nodes_involved);
+        } else {
+            $('#nodesInvolved').text('未知');
+        }
         
         if (response.query_info && response.query_info.optimized_sql) {
             $('#optimizedSQL').text(response.query_info.optimized_sql);
@@ -437,3 +445,4 @@ $(document).ready(function() {
 });
 </script>
 {% endblock %}
+

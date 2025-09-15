@@ -22,7 +22,6 @@ DATABASE_NODES = {
         'name': '西南交通大学图书馆',
         'location': {'lat': 30.7569, 'lng': 103.9871},
         'address': '成都市金牛区二环路北一段111号',
-        'location': {'lat': 30.7569, 'lng': 103.9871},
         'host': 'localhost', 
         'port': 5003,
         'database': 'swjtu_library.db'
@@ -62,3 +61,4 @@ SYSTEM_CONFIG = {
     'show_optimization': True,
     'auto_refresh': 3000  # 界面自动刷新间隔（毫秒）
 }
+

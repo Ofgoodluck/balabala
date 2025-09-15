@@ -1,0 +1,169 @@
+# Docker Compose配置文件 - 分布式图书馆系统
+
+services:
+  # PostgreSQL 数据库节点
+  db-node1:
+    image: postgres:13
+    environment:
+      POSTGRES_DB: scu_library
+      POSTGRES_USER: library_user
+      POSTGRES_PASSWORD: library_pass
+    ports:
+      - "5432:5432"
+    volumes:
+      - db1_data:/var/lib/postgresql/data
+      - ./sql/init_node1.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - library_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U library_user -d scu_library"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  db-node2:
+    image: postgres:13
+    environment:
+      POSTGRES_DB: uestc_library
+      POSTGRES_USER: library_user
+      POSTGRES_PASSWORD: library_pass
+    ports:
+      - "5433:5432"
+    volumes:
+      - db2_data:/var/lib/postgresql/data
+      - ./sql/init_node2.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - library_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U library_user -d uestc_library"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  db-node3:
+    image: postgres:13
+    environment:
+      POSTGRES_DB: swjtu_library
+      POSTGRES_USER: library_user
+      POSTGRES_PASSWORD: library_pass
+    ports:
+      - "5434:5432"
+    volumes:
+      - db3_data:/var/lib/postgresql/data
+      - ./sql/init_node3.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - library_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U library_user -d swjtu_library"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Redis 缓存
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    networks:
+      - library_network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # 节点服务器
+  node-service1:
+    build: .
+    ports:
+      - "5001:5000"
+    environment:
+      - NODE_TYPE=node
+      - NODE_ID=node1
+      - DB_HOST=db-node1
+      - DB_PORT=5432
+      - DB_NAME=scu_library
+      - DB_USER=library_user
+      - DB_PASSWORD=library_pass
+      - REDIS_URL=redis://redis:6379
+    depends_on:
+      db-node1:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - library_network
+    restart: unless-stopped
+
+  node-service2:
+    build: .
+    ports:
+      - "5002:5000"
+    environment:
+      - NODE_TYPE=node
+      - NODE_ID=node2
+      - DB_HOST=db-node2
+      - DB_PORT=5432
+      - DB_NAME=uestc_library
+      - DB_USER=library_user
+      - DB_PASSWORD=library_pass
+      - REDIS_URL=redis://redis:6379
+    depends_on:
+      db-node2:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - library_network
+    restart: unless-stopped
+
+  node-service3:
+    build: .
+    ports:
+      - "5003:5000"
+    environment:
+      - NODE_TYPE=node
+      - NODE_ID=node3
+      - DB_HOST=db-node3
+      - DB_PORT=5432
+      - DB_NAME=swjtu_library
+      - DB_USER=library_user
+      - DB_PASSWORD=library_pass
+      - REDIS_URL=redis://redis:6379
+    depends_on:
+      db-node3:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - library_network
+    restart: unless-stopped
+
+  # 主应用节点
+  app-master:
+    build: .
+    ports:
+      - "5000:5000"
+    environment:
+      - NODE_TYPE=master
+      - REDIS_URL=redis://redis:6379
+      - DEBUG=true
+    depends_on:
+      - node-service1
+      - node-service2
+      - node-service3
+      - redis
+    networks:
+      - library_network
+    volumes:
+      - ./logs:/app/logs
+    restart: unless-stopped
+
+volumes:
+  db1_data:
+  db2_data:
+  db3_data:
+
+networks:
+  library_network:
+    driver: bridge

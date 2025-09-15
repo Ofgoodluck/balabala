@@ -682,5 +682,52 @@ function initLoadDistributionChart() {
 $(window).on('beforeunload', function() {
     stopRealTimeMonitor();
 });
+
+// 缺失的工具函数
+function createStatusBadge(status) {
+    const statusMap = {
+        'completed': '<span class="badge bg-success">完成</span>',
+        'sent': '<span class="badge bg-info">已发送</span>',
+        'failed': '<span class="badge bg-danger">失败</span>',
+        'executing': '<span class="badge bg-warning">执行中</span>',
+        'executed': '<span class="badge bg-success">已执行</span>',
+        'pending': '<span class="badge bg-secondary">等待中</span>'
+    };
+    return statusMap[status] || '<span class="badge bg-secondary">未知</span>';
+}
+
+function showAlert(message, type) {
+    // 创建Bootstrap警告框
+    const alertHtml = `
+        <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    `;
+    
+    // 在页面顶部显示警告
+    $('body').prepend(alertHtml);
+    
+    // 3秒后自动关闭
+    setTimeout(function() {
+        $('.alert').fadeOut();
+    }, 3000);
+}
+
+// 修复JavaScript语法错误
+function getLogEntryClass(status) {
+    switch (status) {
+        case 'completed':
+        case 'sent':
+            return 'success';
+        case 'failed':
+            return 'error';
+        case 'executing':
+            return 'warning';
+        default:
+            return '';
+    }
+}
 </script>
 {% endblock %}
+

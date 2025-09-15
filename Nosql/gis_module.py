@@ -358,3 +358,6 @@ class GISManager:
             return json.dumps(geojson_data, ensure_ascii=False, indent=2)
         
         return "Unsupported format type"
+
+
+

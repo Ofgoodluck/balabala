@@ -376,9 +376,10 @@ function analyzeQuery() {
     
     // 提交查询进行分析
     $.ajax({
-        url: '/query',
+        url: '/api/analyze_query',
         method: 'POST',
-        data: { sql: sql },
+        contentType: 'application/json',
+        data: JSON.stringify({ sql: sql }),
         dataType: 'json',
         success: function(response) {
             if (response.success) {
@@ -619,3 +620,4 @@ function addLogEntry(message, type = 'info') {
 }
 </script>
 {% endblock %}
+

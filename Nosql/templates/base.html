@@ -250,16 +250,28 @@
         function createStatusBadge(status) {
             const statusMap = {
                 'completed': 'success',
-                'failed': 'error',
+                'sent': 'success', 
+                'failed': 'danger',
+                'error': 'danger',
                 'executing': 'warning',
-                'received': 'info'
+                'received': 'info',
+                'pending': 'secondary'
             };
             
             const badgeClass = statusMap[status] || 'secondary';
-            return `<span class="status-badge status-${badgeClass}">${status}</span>`;
+            const displayText = status === 'sent' ? '已发送' : 
+                               status === 'completed' ? '完成' :
+                               status === 'failed' ? '失败' :
+                               status === 'error' ? '错误' :
+                               status === 'executing' ? '执行中' :
+                               status === 'received' ? '已接收' :
+                               status === 'pending' ? '等待' : status;
+            
+            return `<span class="badge bg-${badgeClass}">${displayText}</span>`;
         }
     </script>
     
     {% block extra_js %}{% endblock %}
 </body>
 </html>
+

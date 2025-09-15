@@ -1,0 +1,37 @@
+# 简化版Docker Compose - 用于测试网络连接
+
+services:
+  # 测试用Redis服务
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    networks:
+      - library_network
+
+  # 测试用数据库
+  db-test:
+    image: postgres:13-alpine
+    environment:
+      POSTGRES_DB: test_library
+      POSTGRES_USER: library_user
+      POSTGRES_PASSWORD: library_pass
+    ports:
+      - "5432:5432"
+    volumes:
+      - db_test_data:/var/lib/postgresql/data
+    networks:
+      - library_network
+
+volumes:
+  redis_data:
+  db_test_data:
+
+networks:
+  library_network:
+    driver: bridge
+
+

@@ -416,7 +416,7 @@ function displaySearchResults(books) {
                     <td><code>${book.isbn}</code></td>
                     <td>${libraryName}</td>
                     <td class="${availableClass}">${book.available_copies}/${book.total_copies}</td>
-                    <td><small>${book.location_in_library || 'N/A'}</small></td>
+                    <td><small>${book.location_in_library || '未设置'}</small></td>
                     <td>
                         <button class="btn btn-sm btn-primary" onclick="quickBorrow(${book.id}, ${book.library_id})" 
                                 ${book.available_copies <= 0 ? 'disabled' : ''}>
@@ -675,3 +675,4 @@ function getLibraryName(libraryId) {
 }
 </script>
 {% endblock %}
+

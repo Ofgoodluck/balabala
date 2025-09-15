@@ -10,6 +10,12 @@
         <div class="col-12">
             <h2><i class="fas fa-tachometer-alt"></i> 系统监控面板</h2>
             <p class="text-muted">实时监控分布式系统状态和性能指标</p>
+            {% if data.error_message %}
+            <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                <i class="fas fa-exclamation-triangle"></i> {{ data.error_message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+            {% endif %}
         </div>
     </div>
     
@@ -19,7 +25,7 @@
             <div class="card text-center bg-primary text-white">
                 <div class="card-body">
                     <h4><i class="fas fa-server"></i></h4>
-                    <h2>{{ data.node_status|length }}</h2>
+                    <h2>{{ data.node_status|length if data.node_status else 0 }}</h2>
                     <p>活跃节点</p>
                 </div>
             </div>
@@ -29,7 +35,7 @@
             <div class="card text-center bg-success text-white">
                 <div class="card-body">
                     <h4><i class="fas fa-search"></i></h4>
-                    <h2>{{ data.performance_stats.total_queries }}</h2>
+                    <h2>{{ data.performance_stats.get('total_queries', 0) }}</h2>
                     <p>总查询数</p>
                 </div>
             </div>
@@ -39,7 +45,7 @@
             <div class="card text-center bg-info text-white">
                 <div class="card-body">
                     <h4><i class="fas fa-clock"></i></h4>
-                    <h2>{{ "%.2f"|format(data.performance_stats.average_response_time * 1000) }}ms</h2>
+                    <h2>{{ "%.2f"|format((data.performance_stats.get('average_response_time', 0) * 1000)) }}ms</h2>
                     <p>平均响应时间</p>
                 </div>
             </div>
@@ -50,8 +56,8 @@
                 <div class="card-body">
                     <h4><i class="fas fa-percentage"></i></h4>
                     <h2>
-                        {% if data.performance_stats.total_queries > 0 %}
-                            {{ "%.1f"|format((data.performance_stats.successful_queries / data.performance_stats.total_queries) * 100) }}%
+                        {% if data.performance_stats.get('total_queries', 0) > 0 %}
+                            {{ "%.1f"|format((data.performance_stats.get('successful_queries', 0) / data.performance_stats.get('total_queries', 1)) * 100) }}%
                         {% else %}
                             0%
                         {% endif %}
@@ -74,7 +80,7 @@
                 </div>
                 <div class="card-body">
                     <div class="row">
-                        {% for node_id, node_info in data.node_status.items() %}
+                        {% for node_id, node_info in (data.node_status.items() if data.node_status else []) %}
                         <div class="col-md-4 mb-3">
                             <div class="card border-primary node-card">
                                 <div class="card-header bg-primary text-white">
@@ -125,17 +131,23 @@
                 <div class="card-body">
                     <div class="mb-3">
                         <strong>启动时间:</strong><br>
-                        <small>{{ data.system_status.startup_time.strftime('%Y-%m-%d %H:%M:%S') }}</small>
+                        <small>
+                            {% if data.system_status.get('startup_time') %}
+                                {{ data.system_status.get('startup_time') }}
+                            {% else %}
+                                未知
+                            {% endif %}
+                        </small>
                     </div>
                     
                     <div class="mb-3">
                         <strong>总请求数:</strong><br>
-                        <span class="badge bg-primary">{{ data.system_status.total_requests }}</span>
+                        <span class="badge bg-primary">{{ data.system_status.get('total_requests', 0) }}</span>
                     </div>
                     
                     <div class="mb-3">
                         <strong>活跃连接:</strong><br>
-                        <span class="badge bg-success">{{ data.system_status.active_connections }}</span>
+                        <span class="badge bg-success">{{ data.system_status.get('active_connections', 0) }}</span>
                     </div>
                     
                     <div class="mb-3">
@@ -152,16 +164,16 @@
                 </div>
                 <div class="card-body">
                     <div class="mb-2">
-                        <strong>图书馆数量:</strong> {{ data.gis_coverage.total_libraries }}
+                        <strong>图书馆数量:</strong> {{ data.gis_coverage.get('total_libraries', 0) if data.gis_coverage else 0 }}
                     </div>
                     <div class="mb-2">
-                        <strong>网络连接:</strong> {{ data.gis_coverage.network_connections }}
+                        <strong>网络连接:</strong> {{ data.gis_coverage.get('network_connections', 0) if data.gis_coverage else 0 }}
                     </div>
                     <div class="mb-2">
-                        <strong>平均距离:</strong> {{ data.gis_coverage.average_distance }}km
+                        <strong>平均距离:</strong> {{ data.gis_coverage.get('average_distance', 0) if data.gis_coverage else 0 }}km
                     </div>
                     <div class="mb-2">
-                        <strong>服务重叠:</strong> {{ data.gis_coverage.service_overlap|length }} 处
+                        <strong>服务重叠:</strong> {{ (data.gis_coverage.get('service_overlap', [])|length) if data.gis_coverage else 0 }} 处
                     </div>
                 </div>
             </div>
@@ -193,7 +205,7 @@
                                 </tr>
                             </thead>
                             <tbody id="transactionsTable">
-                                {% for transaction in data.recent_transactions %}
+                                {% for transaction in (data.recent_transactions if data.recent_transactions else []) %}
                                 <tr>
                                     <td>
                                         <small>{{ transaction.timestamp }}</small>
@@ -205,12 +217,12 @@
                                         <span class="badge bg-secondary">{{ transaction.type }}</span>
                                     </td>
                                     <td>
-                                        {% if transaction.details.sql %}
+                                        {% if transaction.get('details', {}).get('sql') %}
                                             <code>{{ transaction.details.sql[:50] }}{% if transaction.details.sql|length > 50 %}...{% endif %}</code>
-                                        {% elif transaction.details.error %}
+                                        {% elif transaction.get('details', {}).get('error') %}
                                             <span class="text-danger">{{ transaction.details.error[:50] }}{% if transaction.details.error|length > 50 %}...{% endif %}</span>
                                         {% else %}
-                                            {{ transaction.details }}
+                                            {{ transaction.get('details', '无详情') or transaction.get('type', 'SELECT') }}
                                         {% endif %}
                                     </td>
                                     <td>
@@ -299,7 +311,7 @@ $(document).ready(function() {
 });
 
 function updateUptime() {
-    const startTime = new Date('{{ data.system_status.startup_time.isoformat() }}');
+    const startTime = new Date('{{ data.system_status.get("startup_time").isoformat() if data.system_status.get("startup_time") else "1970-01-01T00:00:00" }}');
     const now = new Date();
     const uptime = now - startTime;
     
@@ -405,9 +417,9 @@ function initLoadChart() {
         labels: ['四川大学', '电子科技大学', '西南交通大学'],
         datasets: [{
             label: '查询负载',
-            data: [{{ data.node_status.node1.commands_count or 0 }}, 
-                   {{ data.node_status.node2.commands_count or 0 }}, 
-                   {{ data.node_status.node3.commands_count or 0 }}],
+            data: [{{ data.node_status.get('node1', {}).get('commands_count', 0) if data.node_status else 0 }}, 
+                   {{ data.node_status.get('node2', {}).get('commands_count', 0) if data.node_status else 0 }}, 
+                   {{ data.node_status.get('node3', {}).get('commands_count', 0) if data.node_status else 0 }}],
             backgroundColor: [
                 'rgba(255, 99, 132, 0.2)',
                 'rgba(54, 162, 235, 0.2)',
@@ -443,3 +455,4 @@ function refreshDashboard() {
 }
 </script>
 {% endblock %}
+
